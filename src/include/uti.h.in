@@ -3,10 +3,10 @@
 #include <pthread.h>
 
 /* Type of the value part of a key-value pair */
-#define UTI_TYPE_BOOL
-#define UTI_TYPE_CPU_SET_T
-#define UTI_TYPE_CHAR_STAR
-#define UTI_TYPE_ENUM
+#define UTI_TYPE_BOOL 1
+#define UTI_TYPE_CPU_SET_T 2
+#define UTI_TYPE_CHAR_STAR 3
+#define UTI_TYPE_ENUM 4
 
 typedef uint16_t uti_type_t;
 
