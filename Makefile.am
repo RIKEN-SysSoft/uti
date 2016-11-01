@@ -1,0 +1,67 @@
+AUTOMAKE_OPTIONS = foreign
+ACLOCAL_AMFLAGS = -I confdb
+
+# automake requires that we initialize variables to something, even just empty,
+# before appending to them with "+="
+AM_CPPFLAGS = 
+include_HEADERS = 
+nodist_include_HEADERS =
+nodist_noinst_HEADERS = 
+BUILT_SOURCES = 
+bin_PROGRAMS =
+bin_SCRIPTS = 
+dist_noinst_SCRIPTS = 
+noinst_DATA =
+dist_noinst_DATA = 
+noinst_HEADERS = 
+noinst_LIBRARIES = 
+sysconf_DATA = 
+CLEANFILES =
+DISTCLEANFILES =
+SUFFIXES = 
+EXTRA_DIST =
+DOC_SUBDIRS =
+MANDOC_SUBDIRS =
+HTMLDOC_SUBDIRS =
+INSTALL_DATA_LOCAL_TARGETS =
+
+# add target name to this variable to add them to the dependencies of the
+# clean-local target
+CLEAN_LOCAL_TARGETS =
+
+DIST_SUBDIRS = ${external_subdirs}
+SUBDIRS = ${external_subdirs}
+
+lib_LTLIBRARIES = lib/lib@UTILIBNAME@.la
+lib_lib@UTILIBNAME@_la_SOURCES = 
+nodist_lib_lib@UTILIBNAME@_la_SOURCES =
+lib_lib@UTILIBNAME@_la_LIBADD = $(external_libs)
+lib_lib@UTILIBNAME@_la_LDFLAGS = $(external_ldflags) $(ABIVERSIONFLAGS)
+
+# these are source files that provide UTI functions.
+# Makefile.mk adds files to it.
+uti_sources = 
+
+# include subdir automake fragments
+include src/include/Makefile.mk
+include src/Makefile.mk
+
+lib_lib@UTILIBNAME@_la_SOURCES += $(uti_sources)
+
+# build the current directory
+SUBDIRS += .
+DIST_SUBDIRS += .
+
+EXTRA_DIST += README CHANGES COPYRIGHT
+
+# the configure step checks for the 'lib' dir to decide whether a source 
+# directory has been previously used for an in-path build before allowing a
+# VPATH build to continue
+distclean-local:
+	-rm -rf $(top_builddir)/lib
+	-rm -rf $(top_builddir)/bin
+	-rm -rf $(top_builddir)/include
+	-rm -rf $(top_builddir)/share
+
+# created by confdb/aclocal_cache.m4
+DISTCLEANFILES += config.system

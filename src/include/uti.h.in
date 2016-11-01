@@ -1,0 +1,43 @@
+#include <stdint.h>
+#include <stdbool.h>
+#include <pthread.h>
+
+/* Type of the value part of a key-value pair */
+#define UTI_TYPE_BOOL
+#define UTI_TYPE_CPU_SET_T
+#define UTI_TYPE_CHAR_STAR
+#define UTI_TYPE_ENUM
+
+typedef uint16_t uti_type_t;
+
+typedef enum uti_behavior {
+	UTI_BEHAVIOR_EVENTS,
+	UTI_BEHAVIOR_POLLING
+} uti_behavior_t;
+
+typedef struct uti_value {
+	uti_type_t type;
+	union {
+		bool flag;
+		cpu_set_t cpu_set;
+		char* cpu_numa_nodes;
+		char* mem_numa_nodes;
+		uti_behavior_t behavior;
+	};
+} uti_value_t;
+
+typedef struct uti_attr_node {
+    char* key;
+    uti_value_t value;
+    struct uti_attr_node *next, *prev;
+} uti_attr_node_t;
+
+typedef uti_attr_node_t uti_attr_t;
+
+int uti_attr_create(uti_attr_t *attr);
+int uti_attr_destroy(uti_attr_t *attr);
+int uti_attr_put(uti_attr_t *attr, char* key, uti_value_t* val);
+int uti_attr_get(uti_attr_t *attr, char* key, uti_value_t* val);
+int uti_pthread_create(pthread_t *thread, const pthread_attr_t * attr,
+                       void *(*start_routine) (void *), void * arg,
+                       uti_attr_t *uti_attr);
