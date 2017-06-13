@@ -304,6 +304,9 @@ AC_SUBST_FILE([cc_shlib_conf])
 # do compilation tests using CC and CPP
 AC_LANG_C
 
+# look for pthread
+AC_CHECK_LIB([pthread], [pthread_create], [PAC_PREPEND_FLAG([-lpthread],[LIBS])], [AC_MSG_ERROR([could not find pthread library.  Configure aborted])])
+
 # look for ar
 AC_CHECK_PROGS(AR,ar)
 if test -z "$AR" ; then
