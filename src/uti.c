@@ -1,11 +1,15 @@
+#include <stdlib.h>
+#include <strings.h>
 #include <stdbool.h>
 #include "uti.h"
 
 int uti_attr_init(uti_attr_t *attr) {
+	bzero(attr, sizeof(uti_attr_t));
     return 0;
 }
 
 int uti_attr_destroy(uti_attr_t *attr) {
+	free(attr);
     return 0;
 }
 
