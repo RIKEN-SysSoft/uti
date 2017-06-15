@@ -25,7 +25,7 @@
 
 typedef struct uti_attr {
     /* UTI_CPU_SET environmental variable is used to denote the preferred location of utility thread */
-    uint64_t numa_set[UTI_MAX_NUMA_DOMAINS];
+    uint64_t numa_set[(UTI_MAX_NUMA_DOMAINS + sizeof(uint64_t) * 8 - 1) / (sizeof(uint64_t) * 8)];
     uint64_t flags; /* Representing location and behavior hints by bitmap */
     uint64_t valid; /* Valid bit for flag */
 } uti_attr_t;
