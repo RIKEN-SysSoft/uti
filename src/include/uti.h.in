@@ -27,7 +27,6 @@ typedef struct uti_attr {
     /* UTI_CPU_SET environmental variable is used to denote the preferred location of utility thread */
     uint64_t numa_set[(UTI_MAX_NUMA_DOMAINS + sizeof(uint64_t) * 8 - 1) / (sizeof(uint64_t) * 8)];
     uint64_t flags; /* Representing location and behavior hints by bitmap */
-    uint64_t valid; /* Valid bit for flag */
 } uti_attr_t;
 
 int uti_attr_init(uti_attr_t *attr);
@@ -39,7 +38,7 @@ int uti_attr_destroy(uti_attr_t *attr);
         _err = EINVAL;                                                  \
     } else {                                                            \
         memcpy((uti_attr)->numa_set, nodemask, (UTI_MAX_NUMA_DOMAINS + 7) / 8); \
-        (uti_attr)->valid |= UTI_FLAG_NUMA_SET;                               \
+        (uti_attr)->flags |= UTI_FLAG_NUMA_SET;                               \
     }                                                                   \
     _err;                                                               \
 } )
@@ -50,7 +49,6 @@ int uti_attr_destroy(uti_attr_t *attr);
         _err = EINVAL;										   \
     } else {												   \
         (uti_attr)->flags |= UTI_FLAG_SAME_NUMA_DOMAIN;          \
-        (uti_attr)->valid |= UTI_FLAG_SAME_NUMA_DOMAIN;          \
     }														   \
 	_err;													   \
 } )
@@ -61,7 +59,6 @@ int uti_attr_destroy(uti_attr_t *attr);
         _err = EINVAL;                                      \
     } else {                                                \
         (uti_attr)->flags |= UTI_FLAG_DIFFERENT_NUMA_DOMAIN;           \
-        (uti_attr)->valid |= UTI_FLAG_DIFFERENT_NUMA_DOMAIN;           \
     }																 \
 _err;                                           \
 } )
@@ -72,7 +69,6 @@ _err;                                           \
         _err = EINVAL;                                      \
     } else {                                                \
         (uti_attr)->flags |= UTI_FLAG_SAME_L1;      \
-        (uti_attr)->valid |= UTI_FLAG_SAME_L1;      \
     }											  \
 _err;                                           \
 } )
@@ -83,7 +79,6 @@ _err;                                           \
         _err = EINVAL;                                      \
     } else {                                                \
         (uti_attr)->flags |= UTI_FLAG_SAME_L2;      \
-        (uti_attr)->valid |= UTI_FLAG_SAME_L2;      \
     }											  \
 _err;                                           \
 } )
@@ -95,7 +90,6 @@ _err;                                           \
         _err = EINVAL;                                      \
     } else {                                                \
         (uti_attr)->flags |= UTI_FLAG_SAME_L3;      \
-        (uti_attr)->valid |= UTI_FLAG_SAME_L3;      \
     }											  \
 _err;                                           \
 } )
@@ -107,7 +101,6 @@ _err;                                           \
         _err = EINVAL;                                      \
     } else {                                                \
         (uti_attr)->flags |= UTI_FLAG_DIFFERENT_L1;           \
-        (uti_attr)->valid |= UTI_FLAG_DIFFERENT_L1;           \
     }														\
 _err;                                           \
 } )
@@ -118,7 +111,6 @@ _err;                                           \
         _err = EINVAL;                                      \
     } else {                                                \
         (uti_attr)->flags |= UTI_FLAG_DIFFERENT_L2;           \
-        (uti_attr)->valid |= UTI_FLAG_DIFFERENT_L2;           \
     }														\
 _err;                                           \
 } )
@@ -129,7 +121,6 @@ _err;                                           \
         _err = EINVAL;                                      \
     } else {                                                \
         (uti_attr)->flags |= UTI_FLAG_DIFFERENT_L3;           \
-        (uti_attr)->valid |= UTI_FLAG_DIFFERENT_L3;           \
     }														\
 _err;                                           \
 } )
@@ -140,7 +131,6 @@ _err;                                           \
         _err = EINVAL;                                      \
     } else {                                                \
         (uti_attr)->flags |= UTI_FLAG_EXCLUSIVE_CPU;           \
-        (uti_attr)->valid |= UTI_FLAG_EXCLUSIVE_CPU;           \
     }														 \
 _err;                                           \
 } )
@@ -151,7 +141,6 @@ _err;                                           \
         _err = EINVAL;                                      \
     } else {                                                \
         (uti_attr)->flags |= UTI_FLAG_CPU_INTENSIVE;           \
-        (uti_attr)->valid |= UTI_FLAG_CPU_INTENSIVE;           \
     }														 \
 _err;                                           \
 } )
@@ -162,7 +151,6 @@ _err;                                           \
         _err = EINVAL;                                      \
     } else {                                                \
         (uti_attr)->flags |= UTI_FLAG_HIGH_PRIORITY;           \
-        (uti_attr)->valid |= UTI_FLAG_HIGH_PRIORITY;           \
     }														 \
 _err;                                           \
 } )
@@ -173,7 +161,6 @@ _err;                                           \
         _err = EINVAL;                                      \
     } else {                                                \
         (uti_attr)->flags |= UTI_FLAG_NON_COOPERATIVE;           \
-        (uti_attr)->valid |= UTI_FLAG_NON_COOPERATIVE;           \
     }														   \
 _err;                                           \
 } )
