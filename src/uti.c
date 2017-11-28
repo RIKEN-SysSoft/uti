@@ -9,7 +9,7 @@ int uti_attr_init(uti_attr_t *attr) {
 }
 
 int uti_attr_destroy(uti_attr_t *attr) {
-	free(attr);
+	/* Do nothing */
     return 0;
 }
 
@@ -18,10 +18,20 @@ int uti_pthread_create(pthread_t *thread, const pthread_attr_t * attr,
 	int rc;
 	char *disable = getenv("DISABLE_UTI");
 
-	if (!disable)
-		syscall(731, 1, uti_attr);
+	if (!disable) {
+		rc = syscall(731, 1, uti_attr);
+		if (rc != 0) {
+			goto out;
+		}
+	}
 	rc = pthread_create(thread, attr, start_routine, arg);
-	if (!disable)
+	if (rc != 0) {
+		goto out;
+	}
+
+	if (!disable) {
 		syscall(731, 0, NULL);
+	}
+ out:
 	return rc;
 }
