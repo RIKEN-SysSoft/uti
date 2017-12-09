@@ -23,9 +23,9 @@ void *util_thread(void *arg) {
 
 	rc = syscall(732);
 	if (rc == -1)
-		fprintf(stderr, "[OK] uti-01%03d: running on Linux \n", lineno++);
+		fprintf(stderr, "[  OK] uti-01%03d: running on Linux \n", lineno++);
 	else {
-		fprintf(stderr, "[NG] uti-01%03d: running on Linux (%d)\n", lineno++, rc);
+		fprintf(stderr, "[  NG] uti-01%03d: running on Linux (%d)\n", lineno++, rc);
 	}
 
 	tid = syscall(SYS_gettid);
@@ -38,7 +38,7 @@ void *util_thread(void *arg) {
 	}
 	flag = 0;
 	pthread_mutex_unlock(&mutex);
-	fprintf(stderr, "[OK] uti-01%03d: returned from pthread_cond_wait()\n", lineno++);
+	fprintf(stderr, "[  OK] uti-01%03d: returned from pthread_cond_wait()\n", lineno++); fflush(stderr);
 
 	return NULL;
 }
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 	if (rc) {
 		goto uti_exit;
 	}
-#if 0	
+#if 1
 	/* Give a hint that it's beneficial to put the thread
 	 * on the same NUMA-node as the creator */
 	rc = UTI_ATTR_SAME_NUMA_DOMAIN(&uti_attr);
@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 		goto uti_destroy_and_exit;
 	}
 
-	fprintf(stderr, "[OK] uti-01%03d: returned from uti_pthread_create\n", lineno++);
+	fprintf(stderr, "[  OK] uti-01%03d: returned from uti_pthread_create\n", lineno++);
 	
  uti_destroy_and_exit:
 	rc = uti_attr_destroy(&uti_attr);
@@ -106,15 +106,16 @@ int main(int argc, char **argv) {
 	while (!passed) {
 		asm volatile("pause" ::: "memory"); 
 	}
-	fprintf(stderr, "[OK] uti-01%03d: non-zero value of passed detected\n", lineno++);
+	fprintf(stderr, "[  OK] uti-01%03d: received report from child\n", lineno++);
 	usleep(100 * 1000UL); /* Send debug message through serial takes 0.05 sec */
 
 	pthread_mutex_lock(&mutex);
 	flag = 1;
 	pthread_cond_signal(&cond);
 	pthread_mutex_unlock(&mutex);
-	fprintf(stderr, "[OK] uti-01%03d: returned from pthread_mutex_unlock()\n", lineno++);
+	fprintf(stderr, "[  OK] uti-01%03d: returned from pthread_mutex_unlock()\n", lineno++);
 
+	usleep(100 * 1000UL); /* Let the child exit */
 	fprintf(stderr, "[INFO] uti-01%03d: end\n", lineno++);
  uti_exit:
 	exit(0);
