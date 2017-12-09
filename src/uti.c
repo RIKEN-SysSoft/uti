@@ -21,7 +21,8 @@ int uti_pthread_create(pthread_t *thread, const pthread_attr_t * attr,
 	if (!disable) {
 		rc = syscall(731, 1, uti_attr);
 		if (rc != 0) {
-			goto out;
+			printf("%s: WARNING: util_indicate_clone is not available in this kernel\n");
+			disable = 1;
 		}
 	}
 	rc = pthread_create(thread, attr, start_routine, arg);
