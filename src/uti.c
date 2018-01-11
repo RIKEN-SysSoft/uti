@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <strings.h>
 #include <stdbool.h>
 #include "uti.h"
@@ -22,7 +23,7 @@ int uti_pthread_create(pthread_t *thread, const pthread_attr_t * attr,
 		rc = syscall(731, 1, uti_attr);
 		if (rc != 0) {
 			printf("%s: WARNING: util_indicate_clone is not available in this kernel\n");
-			disable = 1;
+			disable = "1";
 		}
 	}
 	rc = pthread_create(thread, attr, start_routine, arg);
