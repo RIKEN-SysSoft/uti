@@ -1,3 +1,14 @@
+/**
+ * \file uti.c
+ *  License details are found in the file LICENSE.
+ * \brief
+ *  Bridge UTI API to UTI system calls
+ * \author Masamichi Takagi <masamichi.takagi@riken.jp> \par
+ *      Copyright (C) 2016-2017 RIKEN AICS
+ * \author Tomoki Shirasawa <tomoki.shirasawa.kk@hitachi-solutions.com> \par
+ *      Copyright (C) 2017 Hitachi, Ltd.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <strings.h>
