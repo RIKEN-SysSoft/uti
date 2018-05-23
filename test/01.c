@@ -25,7 +25,7 @@ void *util_thread(void *arg) {
 	if (rc == -1)
 		fprintf(stderr, "[  OK] uti-01%03d: running on Linux \n", lineno++);
 	else {
-		fprintf(stderr, "[  NG] uti-01%03d: running on Linux (%d)\n", lineno++, rc);
+		fprintf(stderr, "[  NG] uti-01%03d: running on McKernel\n", lineno++);
 	}
 
 	tid = syscall(SYS_gettid);

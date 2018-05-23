@@ -2,9 +2,10 @@
 
 CC = gcc
 
-CPPFLAGS = -I$(HOME)/project/uti/install/include
+MYHOME=/work/gg10/e29005
+CPPFLAGS = -I$(MYHOME)/project/uti/install/include
 CFLAGS = -g -O2
-LDFLAGS = -L$(HOME)/project/uti/install/lib -luti -Wl,-rpath -Wl,$(HOME)/project/os/install/lib -lpthread
+LDFLAGS = -L$(MYHOME)/project/uti/install/lib -luti -Wl,-rpath -Wl,$(MYHOME)/project/uti/install/lib -lpthread
 SRCS = $(shell ls *.c)
 EXES = $(SRCS:.c=)
 OBJS = $(SRCS:.c=.o)
