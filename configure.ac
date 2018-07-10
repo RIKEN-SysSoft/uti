@@ -46,7 +46,7 @@ else
     echo "Configuring UTI version $UTI_VERSION"
 fi
 
-AC_CONFIG_HEADER([src/include/uticonf.h])
+AC_CONFIG_HEADER([src/include/config.h])
 AH_TOP([/* -*- Mode: C; c-basic-offset:4 ; -*- */
 /* 
  *  (C) 2013 by NEC Corporation.
@@ -95,6 +95,17 @@ CPPFLAGS="$CPPFLAGS $UTILIB_CPPFLAGS"
 LDFLAGS="$LDFLAGS $UTILIB_LDFLAGS"
 LIBS="$LIBS $UTILIB_LIBS"
 
+# Include subconfigure.m4
+m4_include([src/linux/subconfigure.m4])
+m4_include([src/mckernel/subconfigure.m4])
+
+# List of directories of subconfigure.m4
+m4_define([PAC_SUBCFG_MODULE_LIST],
+m4_dquote(
+[src_linux],
+[src_mckernel]dnl <--- this dnl is important
+))
+
 # Add MPI_PATH
 AC_ARG_VAR(MPI_PATH, [MPI install directory])
 
@@ -129,15 +140,16 @@ fi
 export ABIVERSIONFLAGS
 AC_SUBST(AVIVERSIONFLAGS)
 
-AC_ARG_WITH(device,
-	AC_HELP_STRING([--with-device], [Specify the network device for UTI]),,
-	with_device=ib)
-AC_ARG_WITH(pm,
-	AC_HELP_STRING([--with-pm], [Specify the process manager for UTI. UTI uses its KVS to exchange network address of processes.]),,with_pm=pmi)
-AC_ARG_WITH(cross,
-	AC_HELP_STRING([--with-cross=file],
-	[Specify the values of variables that configure cannot
-	determine in a cross-compilation environment]),,with_cross=no)
+# Define with_os
+AC_ARG_WITH(os,
+	AC_HELP_STRING([--with-os], [Specify OS]),,
+	with_os=linux)
+
+# Export with_os to Makefile.am
+AC_SUBST(with_os)
+
+# Export with_os to subconfigure.m4
+export with_os
 
 # Find a C compiler.
 PAC_PROG_CC
@@ -402,11 +414,15 @@ dnl a build aborts due to an error (this is intended to help developers)
 AC_OUTPUT_COMMANDS([if [ ! -d lib ] ;  then mkdir lib; fi
 date > lib/newconfig])
 
-AC_DEFINE(HAVE_UTICONF,1,[Define so that we can test whether the uticonf.h file has been included])
-
 # add the LDFLAGS/LIBS we got so far to WRAPPERs
 WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS $LDFLAGS"
 WRAPPER_LIBS="$WRAPPER_LIBS $LIBS"
+
+# Run PREREQ part of subconfigure.m4
+m4_map([PAC_SUBCFG_DO_PREREQ], [PAC_SUBCFG_MODULE_LIST])
+
+# Run BODY part of subconfigure.m4
+m4_map([PAC_SUBCFG_CONFIGURE_SUBSYS], [PAC_SUBCFG_MODULE_LIST])
 
 # uti test suite
 AC_CONFIG_SUBDIRS([test])

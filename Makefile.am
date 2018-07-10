@@ -5,6 +5,7 @@ ACLOCAL_AMFLAGS = -I confdb
 # before appending to them with "+="
 AM_CPPFLAGS = 
 include_HEADERS = 
+lib_lib@UTILIBNAME@_la_SOURCES =
 nodist_include_HEADERS =
 nodist_noinst_HEADERS = 
 BUILT_SOURCES = 
@@ -32,21 +33,12 @@ CLEAN_LOCAL_TARGETS =
 DIST_SUBDIRS = ${external_subdirs}
 SUBDIRS = ${external_subdirs}
 
+# gather HEADERS, SOURCES, CPPFLAGS
+include $(top_srcdir)/src/Makefile.mk
+
 lib_LTLIBRARIES = lib/lib@UTILIBNAME@.la
-lib_lib@UTILIBNAME@_la_SOURCES = 
-nodist_lib_lib@UTILIBNAME@_la_SOURCES =
 lib_lib@UTILIBNAME@_la_LIBADD = $(external_libs)
 lib_lib@UTILIBNAME@_la_LDFLAGS = $(external_ldflags) $(ABIVERSIONFLAGS)
-
-# these are source files that provide UTI functions.
-# Makefile.mk adds files to it.
-uti_sources = 
-
-# include subdir automake fragments
-include src/include/Makefile.mk
-include src/Makefile.mk
-
-lib_lib@UTILIBNAME@_la_SOURCES += $(uti_sources)
 
 # build the current directory
 SUBDIRS += .

@@ -1,9 +1,8 @@
-AM_CPPFLAGS += -I$(top_srcdir)/src/include \
-               -I$(top_builddir)/src/include
+include_HEADERS += src/include/uti.h
 
-lib_lib@UTILIBNAME@_la_SOURCES += \
-	src/uti.c
+AM_CPPFLAGS += \
+	-I$(top_srcdir)/src/include \
+	-I$(top_builddir)/src/include
 
-#noinst_HEADERS += \
-#	src/uti/include/uti.h
-
+include $(top_srcdir)/src/linux/Makefile.mk
+include $(top_srcdir)/src/mckernel/Makefile.mk

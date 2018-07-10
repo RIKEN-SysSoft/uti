@@ -1,4 +1,4 @@
-/* src/include/uticonf.h.in.  Generated from configure.ac by autoheader.  */
+/* src/include/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* -*- Mode: C; c-basic-offset:4 ; -*- */
 /* 
@@ -39,9 +39,6 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
-
-/* Define so that we can test whether the uticonf.h file has been included */
-#undef HAVE_UTICONF
 
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
