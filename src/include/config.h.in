@@ -1,13 +1,13 @@
 /* src/include/config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* -*- Mode: C; c-basic-offset:4 ; -*- */
 /* 
- *  (C) 2013 by NEC Corporation.
- *      Author: Masamichi Takagi
- *      See COPYRIGHT in top-level directory.
+ * \file config.h
+ *  License details are found in the file LICENSE.
+ * \author Masamichi Takagi  <masamichi.takagi@riken.jp> \par
+ * 	Copyright (C) 2017-2018  Masamichi Takagi
  */
-#ifndef UTICONF_H_INCLUDED
-#define UTICONF_H_INCLUDED
+#ifndef _CONFIG_H_INCLUDED_
+#define _CONFIG_H_INCLUDED_
 
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
@@ -15,6 +15,9 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `hwloc' library (-lhwloc). */
+#undef HAVE_LIBHWLOC
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -135,10 +138,5 @@
 #undef volatile
 
 
-/* include nopackage.h to undef autoconf-defined macros that cause conflicts in
- * subpackages. This should not be necessary, but some packages are too
- * tightly interwined right now */
-#include "nopackage.h"
-
-#endif /* !defined(UTICONF_H_INCLUDED) */
+#endif /* !defined(_CONFIG_H_INCLUDED_) */
 

@@ -15,6 +15,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include "uti.h"
+#include "uti_impl.h"
 
 int uti_attr_init(uti_attr_t *attr) {
 	bzero(attr, sizeof(uti_attr_t));
@@ -41,43 +42,6 @@ int uti_pthread_create(pthread_t *thread, const pthread_attr_t * attr,
 			disable_uti = "1";
 		}
 	}
-
-#if 0
-	/* Allocation and scheduling using UTI_CPU_SET */
-
-	uti_os_kind = getenv("UTI_OS_KIND");
-	if (!uti_os_kind) {
-		uti_os_kind = "Linux";
-	}
-
-	if (!strcmp(uti_os_kind, "Linux")) {
-		char *uti_cpu_set_str;
-		uti_cpu_set_str = getenv("MY_ASYNC_PROGRESS_PIN");
-		if (!async_progress_pin_str) {
-			printf("%s: ERROR: MY_ASYNC_PROGRESS_PIN not found\n", __FUNCTION__);
-			goto sub_out;
-		}
-		
-		list = async_progress_pin_str;
-		while (1) {
-			token = strsep(&list, ",");
-			if (!token) {
-				break;
-			}
-			progress_cpus[n_progress_cpus++] = atoi(token);
-		}
-		
-		rank_str = getenv("PMI_RANK");
-		if (!rank_str) {
-			printf("%s: ERROR: PMI_RANK not found\n", __FUNCTION__);
-			goto sub_out;
-		}
-		rank = atoi(rank_str);
-
-		CPU_ZERO(&cpuset);
-		CPU_SET(progress_cpus[rank % n_progress_cpus], &cpuset);
-	}
-#endif
 
 	rc = pthread_create(thread, attr, start_routine, arg);
 	if (rc != 0) {

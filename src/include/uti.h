@@ -38,6 +38,14 @@ typedef struct uti_attr {
     uint64_t flags; /* Representing location and behavior hints by bitmap */
 } uti_attr_t;
 
+enum UTI_LOGLEVEL {
+	UTI_LOGLEVEL_ERR = 0,
+	UTI_LOGLEVEL_WARN,
+	UTI_LOGLEVEL_DEBUG
+};
+
+extern int loglevel;
+
 int uti_attr_init(uti_attr_t *attr);
 int uti_attr_destroy(uti_attr_t *attr);
 
@@ -174,6 +182,8 @@ _err;                                           \
 _err;                                           \
 } )
 
-int uti_pthread_create(pthread_t *thread, const pthread_attr_t * attr,
+int uti_pthread_create(pthread_t *thread, pthread_attr_t * attr,
                        void *(*start_routine) (void *), void * arg,
                        uti_attr_t *uti_attr);
+
+int uti_set_loglevel(enum UTI_LOGLEVEL level);

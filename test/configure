@@ -631,16 +631,10 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-enable_option_checking=no
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
-subdirs
-BUILD_MCKERNEL_FALSE
-BUILD_MCKERNEL_TRUE
-BUILD_LINUX_FALSE
-BUILD_LINUX_TRUE
 mpich_libtool_static_flag
 BASH_SHELL
 SET_CFLAGS
@@ -648,7 +642,7 @@ VPATH
 MAKE
 AR_FLAGS
 C_LINKPATH_SHL
-UTILIBNAME
+PROGNAME
 master_top_srcdir
 master_top_builddir
 LT_SYS_LIBRARY_PATH
@@ -730,11 +724,10 @@ LDFLAGS
 CFLAGS
 CC
 with_os
-MPI_PATH
 UTI_LIBS
-UTILIB_LDFLAGS
-UTILIB_CPPFLAGS
-UTILIB_CFLAGS
+UTITEST_LDFLAGS
+UTITEST_CPPFLAGS
+UTITEST_CFLAGS
 USER_LIBS
 USER_LDFLAGS
 USER_FCFLAGS
@@ -743,10 +736,6 @@ USER_CXXFLAGS
 USER_CPPFLAGS
 USER_CFLAGS
 CONFIGURE_ARGUMENTS
-ABIVERSION
-libuti_so_version
-UTI_RELEASE_DATE
-UTI_VERSION
 CONFIGURE_ARGS_CLEAN
 target_alias
 host_alias
@@ -806,18 +795,14 @@ enable_libtool_lock
 enable_cache
 enable_strict
 enable_base_cache
-with_hwloc
-with_hwloc_include
-with_hwloc_lib
 '
       ac_precious_vars='build_alias
 host_alias
 target_alias
-UTILIB_CFLAGS
-UTILIB_CPPFLAGS
-UTILIB_LDFLAGS
+UTITEST_CFLAGS
+UTITEST_CPPFLAGS
+UTITEST_LDFLAGS
 UTI_LIBS
-MPI_PATH
 CC
 CFLAGS
 LDFLAGS
@@ -825,9 +810,8 @@ LIBS
 CPPFLAGS
 CPP
 LT_SYS_LIBRARY_PATH
-UTILIBNAME
 AR_FLAGS'
-ac_subdirs_all='test'
+
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -1487,22 +1471,15 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
-  --with-hwloc=PATH       specify path where hwloc include directory and lib
-                          directory can be found
-  --with-hwloc-include=PATH
-                          specify path where hwloc include directory can be
-                          found
-  --with-hwloc-lib=PATH   specify path where hwloc lib directory can be found
 
 Some influential environment variables:
-  UTILIB_CFLAGS
+  UTITEST_CFLAGS
               extra CFLAGS used in building UTI libraries
-  UTILIB_CPPFLAGS
+  UTITEST_CPPFLAGS
               extra CPPFLAGS used in building UTI libraries
-  UTILIB_LDFLAGS
+  UTITEST_LDFLAGS
               extra LDFLAGS used in building UTI libraries
   UTI_LIBS    extra LIBS used in building UTI libraries
-  MPI_PATH    MPI install directory
   CC          C compiler command
   CFLAGS      C compiler flags
   LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
@@ -1513,8 +1490,6 @@ Some influential environment variables:
   CPP         C preprocessor
   LT_SYS_LIBRARY_PATH
               User-defined run-time library search path.
-  UTILIBNAME  can be used to override the name of the UTI library (default:
-              "uti")
   AR_FLAGS    AR command flags
 
 Use these variables to override the choices made by `configure' or to help
@@ -1858,60 +1833,6 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_check_func
-
-# ac_fn_c_find_uintX_t LINENO BITS VAR
-# ------------------------------------
-# Finds an unsigned integer type with width BITS, setting cache variable VAR
-# accordingly.
-ac_fn_c_find_uintX_t ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for uint$2_t" >&5
-$as_echo_n "checking for uint$2_t... " >&6; }
-if eval \${$3+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  eval "$3=no"
-     # Order is important - never check a type that is potentially smaller
-     # than half of the expected target width.
-     for ac_type in uint$2_t 'unsigned int' 'unsigned long int' \
-	 'unsigned long long int' 'unsigned short int' 'unsigned char'; do
-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-int
-main ()
-{
-static int test_array [1 - 2 * !((($ac_type) -1 >> ($2 / 2 - 1)) >> ($2 / 2 - 1) == 3)];
-test_array [0] = 0;
-return test_array [0];
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  case $ac_type in #(
-  uint$2_t) :
-    eval "$3=yes" ;; #(
-  *) :
-    eval "$3=\$ac_type" ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-       if eval test \"x\$"$3"\" = x"no"; then :
-
-else
-  break
-fi
-     done
-fi
-eval ac_res=\$$3
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-
-} # ac_fn_c_find_uintX_t
 
 # ac_fn_c_check_header_mongrel LINENO HEADER VAR INCLUDES
 # -------------------------------------------------------
@@ -2519,35 +2440,17 @@ fi
 CONFIGURE_ARGS_CLEAN=`echo $* | tr '"' ' '`
 
 
-UTI_VERSION=0.0.1
-
-UTI_RELEASE_DATE="unreleased development copy"
-
-libuti_so_version="0:0:1"
-
-
-if test -z "$UTI_VERSION" ; then
-   as_fn_error $? "UTI_VERSION is empty, check maint/version.m4 for errors" "$LINENO" 5
-fi
-
-# ABIvERSION is the name used by simplemake, so we reassign the
-# liblcc_so_version number to it
-ABIVERSION=${liblcc_so_version}
-export ABIVERSION
-export liblcc_so_version
-
-
 # print out the configure options
 CONFIGURE_ARGUMENTS="$ac_configure_args"
 
 if test -n "$ac_configure_args" ; then
-    echo "Configuring UTI version $UTI_VERSION with $ac_configure_args"
+    echo "Configuring uti/test with $ac_configure_args"
 else
-    echo "Configuring UTI version $UTI_VERSION"
+    echo "Configuring uti/test"
 fi
 
 # config.h location and templates
-ac_config_headers="$ac_config_headers src/include/config.h"
+ac_config_headers="$ac_config_headers include/config.h"
 
 
 
@@ -2584,10 +2487,6 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 
-
-# tell subconfigures that they are built from within UTI
-FROM_UTI=yes
-export FROM_UTI
 
 # Save a copy of precious flags as USER_* before any of these flags
 # are being modified by configure tests.
@@ -2629,41 +2528,15 @@ export FROM_UTI
 
 
 
-# Add UTILIB_* to the appropriate flags
+# Add UTITEST_* to the appropriate flags
 
 
 
 
-CFLAGS="$CFLAGS $UTILIB_CFLAGS"
-CPPFLAGS="$CPPFLAGS $UTILIB_CPPFLAGS"
-LDFLAGS="$LDFLAGS $UTILIB_LDFLAGS"
-LIBS="$LIBS $UTILIB_LIBS"
-
-# Include subconfigure.m4
-# start of src/linux/subconfigure.m4
-
-# Define PREREQ macro run by configure
-
-# Define BODY macro run by configure
-
-# end of src/linux/subconfigure.m4
-
-# start of src/mckernel/subconfigure.m4
-
-# Define PREREQ macro run by configure
-
-# Define BODY macro run by configure
-
-# end of src/mckernel/subconfigure.m4
-
-
-# List of directories of subconfigure.m4
-
-
-# Add MPI_PATH
-
-
-#m4_include([debug.m4])
+CFLAGS="$CFLAGS $UTITEST_CFLAGS"
+CPPFLAGS="$CPPFLAGS $UTITEST_CPPFLAGS"
+LDFLAGS="$LDFLAGS $UTITEST_LDFLAGS"
+LIBS="$LIBS $UTITEST_LIBS"
 
 # Check whether --enable-g was given.
 if test "${enable_g+set}" = set; then :
@@ -12465,7 +12338,6 @@ fi
 AM_BACKSLASH='\'
 
 
-
 # compute canonical build/host system type variable
 
 
@@ -13291,9 +13163,6 @@ CFLAGS="$CFLAGS $pac_cc_strict_flags"
 export CFLAGS
 
 
-# First check that we have a clean build if we are doing a VPATH build
-# PAC_VPATH_CHECK(src/include/uti.h, lib)
-
 # This test is complicated by the fact that top_srcdir is not set until
 # the very end of configure. Instead, we get it ourselves.
 if test -z "$top_srcdir" ;  then
@@ -13320,8 +13189,10 @@ fi
 export master_top_builddir
 export master_top_srcdir
 
+# export prefix to Makefile.am
+PROGNAME=uti_test
 
-UTILIBNAME=${UTILIBNAME:-"uti"}
+
 
 # Set up default optimization level of compiler
 UTI_DEFAULT_COPTS="-O2"
@@ -14287,18 +14158,6 @@ _ACEOF
 esac
 
 
-
-
-export AR
-export AR_FLAGS
-export RANLIB
-export UTILIBNAME
-export CC
-export CPPFLAGS
-export LIBS
-export CFLAGS
-export LDFLAGS
-
 # update the cache first with the results of the previous configure steps
 
 # Check whether --enable-base-cache was given.
@@ -14341,80 +14200,14 @@ else
 fi
 
 
+# export prefix to Makefile.am
+
+
 # UTI_SRCDIR gives the test/mpi configure the location of the source
 # files for an UTI implementation
 if test -n "$ac_abs_srcdir" ; then
-    UTI_SRCDIR=$ac_abs_srcdir
+    MPI_SRCDIR=$ac_abs_srcdir
 fi
-
-# ???
-if test -z "$includebuild_dir" ; then
-    includebuild_dir=`pwd`/src/include
-fi
-if test -z "$libbuild_dir" ;  then
-    libbuild_dir=`pwd`/lib
-fi
-
-
-# the following make these definitions:
-# define _UINT<n>_T 1
-# if uint<n>_t is available
-# if not available, define uint<n>_t as the releate C type, e.g.,
-# define uint8_t unsigned char
-ac_fn_c_find_uintX_t "$LINENO" "8" "ac_cv_c_uint8_t"
-case $ac_cv_c_uint8_t in #(
-  no|yes) ;; #(
-  *)
-
-$as_echo "#define _UINT8_T 1" >>confdefs.h
-
-
-cat >>confdefs.h <<_ACEOF
-#define uint8_t $ac_cv_c_uint8_t
-_ACEOF
-;;
-  esac
-
-ac_fn_c_find_uintX_t "$LINENO" "16" "ac_cv_c_uint16_t"
-case $ac_cv_c_uint16_t in #(
-  no|yes) ;; #(
-  *)
-
-
-cat >>confdefs.h <<_ACEOF
-#define uint16_t $ac_cv_c_uint16_t
-_ACEOF
-;;
-  esac
-
-ac_fn_c_find_uintX_t "$LINENO" "32" "ac_cv_c_uint32_t"
-case $ac_cv_c_uint32_t in #(
-  no|yes) ;; #(
-  *)
-
-$as_echo "#define _UINT32_T 1" >>confdefs.h
-
-
-cat >>confdefs.h <<_ACEOF
-#define uint32_t $ac_cv_c_uint32_t
-_ACEOF
-;;
-  esac
-
-ac_fn_c_find_uintX_t "$LINENO" "64" "ac_cv_c_uint64_t"
-case $ac_cv_c_uint64_t in #(
-  no|yes) ;; #(
-  *)
-
-$as_echo "#define _UINT64_T 1" >>confdefs.h
-
-
-cat >>confdefs.h <<_ACEOF
-#define uint64_t $ac_cv_c_uint64_t
-_ACEOF
-;;
-  esac
-
 
 # Checks for header files.
 for ac_header in stdint.h stdlib.h string.h unistd.h
@@ -14450,358 +14243,6 @@ ac_config_commands="$ac_config_commands default-1"
 # add the LDFLAGS/LIBS we got so far to WRAPPERs
 WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS $LDFLAGS"
 WRAPPER_LIBS="$WRAPPER_LIBS $LIBS"
-
-# Run PREREQ part of subconfigure.m4
-
-## begin expansion of PAC_SUBCFG_PREREQ_src_linux
-
-	# Define BUILD_LINUX used in Makefile.mk
-	 if test "X$with_os" = "Xlinux"; then
-  BUILD_LINUX_TRUE=
-  BUILD_LINUX_FALSE='#'
-else
-  BUILD_LINUX_TRUE='#'
-  BUILD_LINUX_FALSE=
-fi
-
-
-## end expansion of PAC_SUBCFG_PREREQ_src_linux
-
-## begin expansion of PAC_SUBCFG_PREREQ_src_mckernel
-
-	# Define BUILD_MCKERNEL used in Makefile.mk
-	 if test "X$with_os" = "Xmckernel"; then
-  BUILD_MCKERNEL_TRUE=
-  BUILD_MCKERNEL_FALSE='#'
-else
-  BUILD_MCKERNEL_TRUE='#'
-  BUILD_MCKERNEL_FALSE=
-fi
-
-
-## end expansion of PAC_SUBCFG_PREREQ_src_mckernel
-
-
-# Run BODY part of subconfigure.m4
-
-## begin expansion of PAC_SUBCFG_BODY_src_linux
-
-# BUILD_LINUX is set above
-if test -z "$BUILD_LINUX_TRUE"; then :
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: RUNNING CONFIGURE FOR LINUX" >&5
-$as_echo "$as_me: RUNNING CONFIGURE FOR LINUX" >&6;}
-
-	ac_fn_c_check_header_mongrel "$LINENO" "sys/capability.h" "ac_cv_header_sys_capability_h" "$ac_includes_default"
-if test "x$ac_cv_header_sys_capability_h" = xyes; then :
-  libcap_found=yes
-else
-  libcap_found=no
-fi
-
-
-	if test "x$libcap_found" != "xyes"; then :
-  as_fn_error $? "Unable to find sys/capability.h, missing libcap-devel?" "$LINENO" 5
-fi
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for cap_get_proc in -lcap" >&5
-$as_echo_n "checking for cap_get_proc in -lcap... " >&6; }
-if ${ac_cv_lib_cap_cap_get_proc+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lcap  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char cap_get_proc ();
-int
-main ()
-{
-return cap_get_proc ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_cap_cap_get_proc=yes
-else
-  ac_cv_lib_cap_cap_get_proc=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cap_cap_get_proc" >&5
-$as_echo "$ac_cv_lib_cap_cap_get_proc" >&6; }
-if test "x$ac_cv_lib_cap_cap_get_proc" = xyes; then :
-  libcap_found=yes
-else
-  libcap_found=no
-fi
-
-	if test "x$libcap_found" != "xyes"; then :
-  as_fn_error $? "Unable to find libcap.so, missing libcap-devel?" "$LINENO" 5
-fi
-
-	# Add --with-hwloc=<path> option
-
-
-# Check whether --with-hwloc was given.
-if test "${with_hwloc+set}" = set; then :
-  withval=$with_hwloc; case "$withval" in #(
-  yes|no|'') :
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --without-hwloc=PATH expects a valid PATH" >&5
-$as_echo "$as_me: WARNING: --without-hwloc=PATH expects a valid PATH" >&2;}
-                          with_hwloc="" ;; #(
-  *) :
-     ;;
-esac
-else
-  with_hwloc=
-fi
-
-
-# Check whether --with-hwloc-include was given.
-if test "${with_hwloc_include+set}" = set; then :
-  withval=$with_hwloc_include; case "$withval" in #(
-  yes|no|'') :
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --without-hwloc-include=PATH expects a valid PATH" >&5
-$as_echo "$as_me: WARNING: --without-hwloc-include=PATH expects a valid PATH" >&2;}
-                          with_hwloc_include="" ;; #(
-  *) :
-     ;;
-esac
-fi
-
-
-# Check whether --with-hwloc-lib was given.
-if test "${with_hwloc_lib+set}" = set; then :
-  withval=$with_hwloc_lib; case "$withval" in #(
-  yes|no|'') :
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --without-hwloc-lib=PATH expects a valid PATH" >&5
-$as_echo "$as_me: WARNING: --without-hwloc-lib=PATH expects a valid PATH" >&2;}
-                          with_hwloc_lib="" ;; #(
-  *) :
-     ;;
-esac
-fi
-
-
-    # The args have been sanitized into empty/non-empty values above.
-    # Now append -I/-L args to CPPFLAGS/LDFLAGS, with more specific options
-    # taking priority
-
-    if test -n "${with_hwloc_include}"; then :
-
-
-	if echo "$CPPFLAGS" | $FGREP -e '-I${with_hwloc_include}' >/dev/null 2>&1; then :
-  echo "CPPFLAGS(='$CPPFLAGS') contains '-I${with_hwloc_include}', not appending" >&5
-else
-  echo "CPPFLAGS(='$CPPFLAGS') does not contain '-I${with_hwloc_include}', appending" >&5
-		CPPFLAGS="$CPPFLAGS -I${with_hwloc_include}"
-
-fi
-
-
-
-	if echo "$WRAPPER_CPPFLAGS" | $FGREP -e '-I${with_hwloc_include}' >/dev/null 2>&1; then :
-  echo "WRAPPER_CPPFLAGS(='$WRAPPER_CPPFLAGS') contains '-I${with_hwloc_include}', not appending" >&5
-else
-  echo "WRAPPER_CPPFLAGS(='$WRAPPER_CPPFLAGS') does not contain '-I${with_hwloc_include}', appending" >&5
-		WRAPPER_CPPFLAGS="$WRAPPER_CPPFLAGS -I${with_hwloc_include}"
-
-fi
-
-else
-  if test -n "${with_hwloc}"; then :
-
-
-	if echo "$CPPFLAGS" | $FGREP -e '-I${with_hwloc}/include' >/dev/null 2>&1; then :
-  echo "CPPFLAGS(='$CPPFLAGS') contains '-I${with_hwloc}/include', not appending" >&5
-else
-  echo "CPPFLAGS(='$CPPFLAGS') does not contain '-I${with_hwloc}/include', appending" >&5
-		CPPFLAGS="$CPPFLAGS -I${with_hwloc}/include"
-
-fi
-
-
-
-	if echo "$WRAPPER_CPPFLAGS" | $FGREP -e '-I${with_hwloc}/include' >/dev/null 2>&1; then :
-  echo "WRAPPER_CPPFLAGS(='$WRAPPER_CPPFLAGS') contains '-I${with_hwloc}/include', not appending" >&5
-else
-  echo "WRAPPER_CPPFLAGS(='$WRAPPER_CPPFLAGS') does not contain '-I${with_hwloc}/include', appending" >&5
-		WRAPPER_CPPFLAGS="$WRAPPER_CPPFLAGS -I${with_hwloc}/include"
-
-fi
-
-fi
-fi
-
-    if test -n "${with_hwloc_lib}"; then :
-
-
-	if echo "$LDFLAGS" | $FGREP -e '-L${with_hwloc_lib}' >/dev/null 2>&1; then :
-  echo "LDFLAGS(='$LDFLAGS') contains '-L${with_hwloc_lib}', not appending" >&5
-else
-  echo "LDFLAGS(='$LDFLAGS') does not contain '-L${with_hwloc_lib}', appending" >&5
-		LDFLAGS="$LDFLAGS -L${with_hwloc_lib}"
-
-fi
-
-
-
-	if echo "$WRAPPER_LDFLAGS" | $FGREP -e '-L${with_hwloc_lib}' >/dev/null 2>&1; then :
-  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') contains '-L${with_hwloc_lib}', not appending" >&5
-else
-  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') does not contain '-L${with_hwloc_lib}', appending" >&5
-		WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS -L${with_hwloc_lib}"
-
-fi
-
-else
-  if test -n "${with_hwloc}"; then :
-
-
-	if echo "$LDFLAGS" | $FGREP -e '-L${with_hwloc}/lib64' >/dev/null 2>&1; then :
-  echo "LDFLAGS(='$LDFLAGS') contains '-L${with_hwloc}/lib64', not appending" >&5
-else
-  echo "LDFLAGS(='$LDFLAGS') does not contain '-L${with_hwloc}/lib64', appending" >&5
-		LDFLAGS="$LDFLAGS -L${with_hwloc}/lib64"
-
-fi
-
-
-
-	if echo "$WRAPPER_LDFLAGS" | $FGREP -e '-L${with_hwloc}/lib64' >/dev/null 2>&1; then :
-  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') contains '-L${with_hwloc}/lib64', not appending" >&5
-else
-  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') does not contain '-L${with_hwloc}/lib64', appending" >&5
-		WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS -L${with_hwloc}/lib64"
-
-fi
-
-
-
-	if echo "$LDFLAGS" | $FGREP -e '-L${with_hwloc}/lib' >/dev/null 2>&1; then :
-  echo "LDFLAGS(='$LDFLAGS') contains '-L${with_hwloc}/lib', not appending" >&5
-else
-  echo "LDFLAGS(='$LDFLAGS') does not contain '-L${with_hwloc}/lib', appending" >&5
-		LDFLAGS="$LDFLAGS -L${with_hwloc}/lib"
-
-fi
-
-
-
-	if echo "$WRAPPER_LDFLAGS" | $FGREP -e '-L${with_hwloc}/lib' >/dev/null 2>&1; then :
-  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') contains '-L${with_hwloc}/lib', not appending" >&5
-else
-  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') does not contain '-L${with_hwloc}/lib', appending" >&5
-		WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS -L${with_hwloc}/lib"
-
-fi
-
-fi
-fi
-
-
-        # Check if hwloc is linkable
-
-
-    failure=no
-    ac_fn_c_check_header_mongrel "$LINENO" "hwloc.h" "ac_cv_header_hwloc_h" "$ac_includes_default"
-if test "x$ac_cv_header_hwloc_h" = xyes; then :
-
-else
-  failure=yes
-fi
-
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for hwloc_topology_init in -lhwloc" >&5
-$as_echo_n "checking for hwloc_topology_init in -lhwloc... " >&6; }
-if ${ac_cv_lib_hwloc_hwloc_topology_init+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lhwloc  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char hwloc_topology_init ();
-int
-main ()
-{
-return hwloc_topology_init ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_hwloc_hwloc_topology_init=yes
-else
-  ac_cv_lib_hwloc_hwloc_topology_init=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_hwloc_hwloc_topology_init" >&5
-$as_echo "$ac_cv_lib_hwloc_hwloc_topology_init" >&6; }
-if test "x$ac_cv_lib_hwloc_hwloc_topology_init" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBHWLOC 1
-_ACEOF
-
-  LIBS="-lhwloc $LIBS"
-
-else
-  failure=yes
-fi
-
-    if test "$failure" = "no" ; then
-       success=yes
-    else
-       success=no
-    fi
-
-	if test "$success" = "no" ; then
-	   as_fn_error $? "'hwloc.h or libhwloc library not found. Did you specify --with-hwloc= or --with-hwloc-include= or --with-hwloc-lib=?'" "$LINENO" 5
-	fi
-
-
-
-
-fi
-## end expansion of PAC_SUBCFG_BODY_src_linux
-
-## begin expansion of PAC_SUBCFG_BODY_src_mckernel
-
-# BUILD_LINUX is set above
-	if test -z "$BUILD_MCKERNEL_TRUE"; then :
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: RUNNING CONFIGURE FOR MCKERNEL" >&5
-$as_echo "$as_me: RUNNING CONFIGURE FOR MCKERNEL" >&6;}
-
-fi
-## end expansion of PAC_SUBCFG_BODY_src_mckernel
-
-
-# uti test suite
-
-
-subdirs="$subdirs test"
-
 
 #################################################################################
 # cause libtool script to be built now so that we can use it to test one last
@@ -16233,14 +15674,6 @@ if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
   as_fn_error $? "conditional \"MAINTAINER_MODE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${BUILD_LINUX_TRUE}" && test -z "${BUILD_LINUX_FALSE}"; then
-  as_fn_error $? "conditional \"BUILD_LINUX\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BUILD_MCKERNEL_TRUE}" && test -z "${BUILD_MCKERNEL_FALSE}"; then
-  as_fn_error $? "conditional \"BUILD_MCKERNEL\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 
 : "${CONFIG_STATUS=./config.status}"
 ac_write_fail=0
@@ -17119,7 +16552,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
-    "src/include/config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/include/config.h" ;;
+    "include/config.h") CONFIG_HEADERS="$CONFIG_HEADERS include/config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "default-1") CONFIG_COMMANDS="$CONFIG_COMMANDS default-1" ;;
@@ -18429,154 +17862,8 @@ if test "$no_create" != yes; then
   # would make configure fail if this is the last instruction.
   $ac_cs_success || as_fn_exit 1
 fi
-
-#
-# CONFIG_SUBDIRS section.
-#
-if test "$no_recursion" != yes; then
-
-  # Remove --cache-file, --srcdir, and --disable-option-checking arguments
-  # so they do not pile up.
-  ac_sub_configure_args=
-  ac_prev=
-  eval "set x $ac_configure_args"
-  shift
-  for ac_arg
-  do
-    if test -n "$ac_prev"; then
-      ac_prev=
-      continue
-    fi
-    case $ac_arg in
-    -cache-file | --cache-file | --cache-fil | --cache-fi \
-    | --cache-f | --cache- | --cache | --cach | --cac | --ca | --c)
-      ac_prev=cache_file ;;
-    -cache-file=* | --cache-file=* | --cache-fil=* | --cache-fi=* \
-    | --cache-f=* | --cache-=* | --cache=* | --cach=* | --cac=* | --ca=* \
-    | --c=*)
-      ;;
-    --config-cache | -C)
-      ;;
-    -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
-      ac_prev=srcdir ;;
-    -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
-      ;;
-    -prefix | --prefix | --prefi | --pref | --pre | --pr | --p)
-      ac_prev=prefix ;;
-    -prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
-      ;;
-    --disable-option-checking)
-      ;;
-    *)
-      case $ac_arg in
-      *\'*) ac_arg=`$as_echo "$ac_arg" | sed "s/'/'\\\\\\\\''/g"` ;;
-      esac
-      as_fn_append ac_sub_configure_args " '$ac_arg'" ;;
-    esac
-  done
-
-  # Always prepend --prefix to ensure using the same prefix
-  # in subdir configurations.
-  ac_arg="--prefix=$prefix"
-  case $ac_arg in
-  *\'*) ac_arg=`$as_echo "$ac_arg" | sed "s/'/'\\\\\\\\''/g"` ;;
-  esac
-  ac_sub_configure_args="'$ac_arg' $ac_sub_configure_args"
-
-  # Pass --silent
-  if test "$silent" = yes; then
-    ac_sub_configure_args="--silent $ac_sub_configure_args"
-  fi
-
-  # Always prepend --disable-option-checking to silence warnings, since
-  # different subdirs can have different --enable and --with options.
-  ac_sub_configure_args="--disable-option-checking $ac_sub_configure_args"
-
-  ac_popdir=`pwd`
-  for ac_dir in : $subdirs; do test "x$ac_dir" = x: && continue
-
-    # Do not complain, so a configure script can configure whichever
-    # parts of a large source tree are present.
-    test -d "$srcdir/$ac_dir" || continue
-
-    ac_msg="=== configuring in $ac_dir (`pwd`/$ac_dir)"
-    $as_echo "$as_me:${as_lineno-$LINENO}: $ac_msg" >&5
-    $as_echo "$ac_msg" >&6
-    as_dir="$ac_dir"; as_fn_mkdir_p
-    ac_builddir=.
-
-case "$ac_dir" in
-.) ac_dir_suffix= ac_top_builddir_sub=. ac_top_build_prefix= ;;
-*)
-  ac_dir_suffix=/`$as_echo "$ac_dir" | sed 's|^\.[\\/]||'`
-  # A ".." for each directory in $ac_dir_suffix.
-  ac_top_builddir_sub=`$as_echo "$ac_dir_suffix" | sed 's|/[^\\/]*|/..|g;s|/||'`
-  case $ac_top_builddir_sub in
-  "") ac_top_builddir_sub=. ac_top_build_prefix= ;;
-  *)  ac_top_build_prefix=$ac_top_builddir_sub/ ;;
-  esac ;;
-esac
-ac_abs_top_builddir=$ac_pwd
-ac_abs_builddir=$ac_pwd$ac_dir_suffix
-# for backward compatibility:
-ac_top_builddir=$ac_top_build_prefix
-
-case $srcdir in
-  .)  # We are building in place.
-    ac_srcdir=.
-    ac_top_srcdir=$ac_top_builddir_sub
-    ac_abs_top_srcdir=$ac_pwd ;;
-  [\\/]* | ?:[\\/]* )  # Absolute name.
-    ac_srcdir=$srcdir$ac_dir_suffix;
-    ac_top_srcdir=$srcdir
-    ac_abs_top_srcdir=$srcdir ;;
-  *) # Relative name.
-    ac_srcdir=$ac_top_build_prefix$srcdir$ac_dir_suffix
-    ac_top_srcdir=$ac_top_build_prefix$srcdir
-    ac_abs_top_srcdir=$ac_pwd/$srcdir ;;
-esac
-ac_abs_srcdir=$ac_abs_top_srcdir$ac_dir_suffix
-
-
-    cd "$ac_dir"
-
-    # Check for guested configure; otherwise get Cygnus style configure.
-    if test -f "$ac_srcdir/configure.gnu"; then
-      ac_sub_configure=$ac_srcdir/configure.gnu
-    elif test -f "$ac_srcdir/configure"; then
-      ac_sub_configure=$ac_srcdir/configure
-    elif test -f "$ac_srcdir/configure.in"; then
-      # This should be Cygnus configure.
-      ac_sub_configure=$ac_aux_dir/configure
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no configuration information is in $ac_dir" >&5
-$as_echo "$as_me: WARNING: no configuration information is in $ac_dir" >&2;}
-      ac_sub_configure=
-    fi
-
-    # The recursion is here.
-    if test -n "$ac_sub_configure"; then
-      # Make the cache file name correct relative to the subdirectory.
-      case $cache_file in
-      [\\/]* | ?:[\\/]* ) ac_sub_cache_file=$cache_file ;;
-      *) # Relative name.
-	ac_sub_cache_file=$ac_top_build_prefix$cache_file ;;
-      esac
-
-      { $as_echo "$as_me:${as_lineno-$LINENO}: running $SHELL $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_srcdir" >&5
-$as_echo "$as_me: running $SHELL $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_srcdir" >&6;}
-      # The eval makes quoting arguments work.
-      eval "\$SHELL \"\$ac_sub_configure\" $ac_sub_configure_args \
-	   --cache-file=\"\$ac_sub_cache_file\" --srcdir=\"\$ac_srcdir\"" ||
-	as_fn_error $? "$ac_sub_configure failed for $ac_dir" "$LINENO" 5
-    fi
-
-    cd "$ac_popdir"
-  done
-fi
 if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
-
 

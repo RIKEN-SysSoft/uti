@@ -8,6 +8,7 @@
 #include <sys/syscall.h>
 #include <sys/mman.h>
 #include <signal.h>
+#include "util.h"
 #include "uti.h"
 
 pthread_mutex_t mutex;
@@ -19,17 +20,12 @@ void *util_thread(void *arg) {
 	int rc;
 	unsigned long mem;
 	int tid;
-	int lineno = 101;
 
 	rc = syscall(732);
-	if (rc == -1)
-		fprintf(stderr, "[  OK] uti-01%03d: running on Linux \n", lineno++);
-	else {
-		fprintf(stderr, "[  NG] uti-01%03d: running on McKernel\n", lineno++);
-	}
+	OKNG(rc == -1, -1, "[ OK ] Running on Linux \n");
 
 	tid = syscall(SYS_gettid);
-	fprintf(stderr, "[INFO] uti-01%03d: tid=%d\n", lineno++, tid);
+	printf("[INFO] tid=%d\n", tid);
 
 	passed = 1;
 	pthread_mutex_lock(&mutex);
@@ -38,8 +34,9 @@ void *util_thread(void *arg) {
 	}
 	flag = 0;
 	pthread_mutex_unlock(&mutex);
-	fprintf(stderr, "[  OK] uti-01%03d: returned from pthread_cond_wait()\n", lineno++); fflush(stderr);
+	printf("[ OK ] Returned from pthread_cond_wait()\n");
 
+out:
 	return NULL;
 }
 
@@ -49,15 +46,14 @@ int main(int argc, char **argv) {
 	pthread_attr_t attr;
 	uti_attr_t uti_attr;
 	int tid;
-	int lineno = 1;
 
 	pthread_mutex_init(&mutex, NULL);
 	pthread_cond_init(&cond, NULL);
 
-	fprintf(stderr, "[INFO] uti-01%03d: start\n", lineno++);
+	printf("[INFO] Start\n");
 
 	tid = syscall(SYS_gettid);
-	fprintf(stderr, "[INFO] uti-01%03d: tid=%d\n", lineno++, tid);
+	printf("[INFO] tid=%d\n", tid);
 	
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
@@ -95,7 +91,7 @@ int main(int argc, char **argv) {
 		goto uti_destroy_and_exit;
 	}
 
-	fprintf(stderr, "[  OK] uti-01%03d: returned from uti_pthread_create\n", lineno++);
+	printf("[ OK ] Returned from uti_pthread_create\n");
 	
  uti_destroy_and_exit:
 	rc = uti_attr_destroy(&uti_attr);
@@ -106,17 +102,17 @@ int main(int argc, char **argv) {
 	while (!passed) {
 		asm volatile("pause" ::: "memory"); 
 	}
-	fprintf(stderr, "[  OK] uti-01%03d: received report from child\n", lineno++);
+	printf("[ OK ] Received report from child\n");
 	usleep(100 * 1000UL); /* Send debug message through serial takes 0.05 sec */
 
 	pthread_mutex_lock(&mutex);
 	flag = 1;
 	pthread_cond_signal(&cond);
 	pthread_mutex_unlock(&mutex);
-	fprintf(stderr, "[  OK] uti-01%03d: returned from pthread_mutex_unlock()\n", lineno++);
+	printf("[ OK ] Returned from pthread_mutex_unlock()\n");
 
 	usleep(100 * 1000UL); /* Let the child exit */
-	fprintf(stderr, "[INFO] uti-01%03d: end\n", lineno++);
+	printf("[INFO] End\n");
  uti_exit:
 	exit(0);
 }

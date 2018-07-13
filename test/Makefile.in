@@ -15,10 +15,6 @@
 @SET_MAKE@
 
 
-
-
-
-
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
   case $${target_option-} in \
@@ -82,116 +78,51 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS =
-DIST_COMMON = $(top_srcdir)/src/Makefile.mk \
-	$(top_srcdir)/src/linux/Makefile.mk \
-	$(top_srcdir)/src/mckernel/Makefile.mk $(srcdir)/Makefile.in \
-	$(srcdir)/Makefile.am $(top_srcdir)/configure \
-	$(am__configure_deps) $(top_srcdir)/src/include/config.h.in \
-	$(dist_noinst_SCRIPTS) $(top_srcdir)/confdb/depcomp \
-	$(dist_noinst_DATA) $(include_HEADERS) $(noinst_HEADERS) \
-	confdb/ar-lib confdb/compile confdb/config.guess \
-	confdb/config.rpath confdb/config.sub confdb/depcomp \
-	confdb/install-sh confdb/missing confdb/ltmain.sh \
-	$(top_srcdir)/confdb/ar-lib $(top_srcdir)/confdb/config.guess \
+bin_PROGRAMS = create$(EXEEXT)
+subdir = .
+DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
+	$(top_srcdir)/configure $(am__configure_deps) \
+	$(top_srcdir)/include/config.h.in $(top_srcdir)/confdb/depcomp \
+	$(noinst_HEADERS) README confdb/ar-lib confdb/compile \
+	confdb/config.guess confdb/config.rpath confdb/config.sub \
+	confdb/depcomp confdb/install-sh confdb/missing \
+	confdb/ltmain.sh $(top_srcdir)/confdb/ar-lib \
+	$(top_srcdir)/confdb/config.guess \
 	$(top_srcdir)/confdb/config.rpath \
 	$(top_srcdir)/confdb/config.sub \
 	$(top_srcdir)/confdb/install-sh $(top_srcdir)/confdb/ltmain.sh \
 	$(top_srcdir)/confdb/missing
-@BUILD_LINUX_TRUE@am__append_1 = \
-@BUILD_LINUX_TRUE@	-I$(top_srcdir)/src/linux/include
-
-@BUILD_LINUX_TRUE@am__append_2 = \
-@BUILD_LINUX_TRUE@	-lhwloc -lcap
-
-@BUILD_LINUX_TRUE@am__append_3 = \
-@BUILD_LINUX_TRUE@	src/linux/uti.c
-
-@BUILD_MCKERNEL_TRUE@am__append_4 = \
-@BUILD_MCKERNEL_TRUE@	-I$(top_srcdir)/src/mckernel/include
-
-@BUILD_MCKERNEL_TRUE@am__append_5 = \
-@BUILD_MCKERNEL_TRUE@	src/mckernel/uti.c
-
-subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/confdb/aclocal_bugfix.m4 \
 	$(top_srcdir)/confdb/aclocal_cache.m4 \
 	$(top_srcdir)/confdb/aclocal_cc.m4 \
-	$(top_srcdir)/confdb/aclocal_libs.m4 \
 	$(top_srcdir)/confdb/aclocal_make.m4 \
 	$(top_srcdir)/confdb/aclocal_runlog.m4 \
 	$(top_srcdir)/confdb/aclocal_shl.m4 \
-	$(top_srcdir)/confdb/aclocal_subcfg.m4 \
 	$(top_srcdir)/confdb/aclocal_util.m4 \
 	$(top_srcdir)/confdb/libtool.m4 \
 	$(top_srcdir)/confdb/ltoptions.m4 \
 	$(top_srcdir)/confdb/ltsugar.m4 \
 	$(top_srcdir)/confdb/ltversion.m4 \
 	$(top_srcdir)/confdb/lt~obsolete.m4 \
-	$(top_srcdir)/maint/version.m4 \
-	$(top_srcdir)/src/linux/subconfigure.m4 \
-	$(top_srcdir)/src/mckernel/subconfigure.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/maint/version.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/src/include/config.h
+CONFIG_HEADER = $(top_builddir)/include/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(bindir)" "$(DESTDIR)$(sysconfdir)" \
-	"$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"
-LTLIBRARIES = $(lib_LTLIBRARIES)
-lib_lib@UTILIBNAME@_la_DEPENDENCIES =
-am__lib_lib@UTILIBNAME@_la_SOURCES_DIST = src/common.c src/linux/uti.c \
-	src/mckernel/uti.c
-am__dirstamp = $(am__leading_dot)dirstamp
-@BUILD_LINUX_TRUE@am__objects_1 = src/linux/uti.lo
-@BUILD_MCKERNEL_TRUE@am__objects_2 = src/mckernel/uti.lo
-am_lib_lib@UTILIBNAME@_la_OBJECTS = src/common.lo $(am__objects_1) \
-	$(am__objects_2)
-lib_lib@UTILIBNAME@_la_OBJECTS = $(am_lib_lib@UTILIBNAME@_la_OBJECTS)
+am__installdirs = "$(DESTDIR)$(bindir)"
+PROGRAMS = $(bin_PROGRAMS)
+am_create_OBJECTS = create.$(OBJEXT)
+create_OBJECTS = $(am_create_OBJECTS)
+create_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-lib_lib@UTILIBNAME@_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(lib_lib@UTILIBNAME@_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
-PROGRAMS = $(bin_PROGRAMS)
-SCRIPTS = $(bin_SCRIPTS) $(dist_noinst_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -204,7 +135,7 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/include
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/confdb/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -226,8 +157,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(lib_lib@UTILIBNAME@_la_SOURCES)
-DIST_SOURCES = $(am__lib_lib@UTILIBNAME@_la_SOURCES_DIST)
+SOURCES = $(create_SOURCES)
+DIST_SOURCES = $(create_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -241,9 +172,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-DATA = $(dist_noinst_DATA) $(noinst_DATA) $(sysconf_DATA)
-HEADERS = $(include_HEADERS) $(nodist_include_HEADERS) \
-	$(nodist_noinst_HEADERS) $(noinst_HEADERS)
+HEADERS = $(nodist_noinst_HEADERS) $(noinst_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -315,7 +244,6 @@ am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
 distcleancheck_listfiles = find . -type f -print
 VPATH = @VPATH@
-ABIVERSION = @ABIVERSION@
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -366,7 +294,6 @@ MAKE = @MAKE@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
-MPI_PATH = @MPI_PATH@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -381,6 +308,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PROGNAME = @PROGNAME@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_CFLAGS = @SET_CFLAGS@
@@ -394,13 +322,10 @@ USER_FCFLAGS = @USER_FCFLAGS@
 USER_FFLAGS = @USER_FFLAGS@
 USER_LDFLAGS = @USER_LDFLAGS@
 USER_LIBS = @USER_LIBS@
-UTILIBNAME = @UTILIBNAME@
-UTILIB_CFLAGS = @UTILIB_CFLAGS@
-UTILIB_CPPFLAGS = @UTILIB_CPPFLAGS@
-UTILIB_LDFLAGS = @UTILIB_LDFLAGS@
+UTITEST_CFLAGS = @UTITEST_CFLAGS@
+UTITEST_CPPFLAGS = @UTITEST_CPPFLAGS@
+UTITEST_LDFLAGS = @UTITEST_LDFLAGS@
 UTI_LIBS = @UTI_LIBS@
-UTI_RELEASE_DATE = @UTI_RELEASE_DATE@
-UTI_VERSION = @UTI_VERSION@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -437,7 +362,6 @@ infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-libuti_so_version = @libuti_so_version@
 localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
@@ -453,7 +377,6 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
@@ -465,53 +388,33 @@ ACLOCAL_AMFLAGS = -I confdb
 
 # automake requires that we initialize variables to something, even just empty,
 # before appending to them with "+="
-AM_CPPFLAGS = -I$(top_srcdir)/src/include \
-	-I$(top_builddir)/src/include $(am__append_1) $(am__append_4)
-AM_LDFLAGS = $(am__append_2)
-include_HEADERS = src/include/uti.h
-lib_lib@UTILIBNAME@_la_SOURCES = src/common.c $(am__append_3) \
-	$(am__append_5)
-nodist_include_HEADERS = 
-nodist_noinst_HEADERS = 
-BUILT_SOURCES = 
-bin_SCRIPTS = 
-dist_noinst_SCRIPTS = 
-noinst_DATA = 
-dist_noinst_DATA = 
-noinst_HEADERS = src/include/uti_impl.h
-noinst_LIBRARIES = 
-sysconf_DATA = 
-CLEANFILES = 
 
-# created by confdb/aclocal_cache.m4
+# Define target-global CPPFLAGS, LDFLAGS
+AM_CPPFLAGS = -I$(prefix)/include
+AM_LDFLAGS = -L$(prefix)/lib -luti
+
+# Specify files that must be distributed but not covered automatically
+# EXTRA_DIST +=
 DISTCLEANFILES = config.system
-SUFFIXES = 
-EXTRA_DIST = README CHANGES COPYRIGHT
-DOC_SUBDIRS = 
-MANDOC_SUBDIRS = 
-HTMLDOC_SUBDIRS = 
-INSTALL_DATA_LOCAL_TARGETS = 
+EXTRA_DIST = 
+noinst_HEADERS = include/util.h
+nodist_noinst_HEADERS = include/config.h
 
-# add target name to this variable to add them to the dependencies of the
-# clean-local target
-CLEAN_LOCAL_TARGETS = 
+# Define target-specific SOURCES, CPPFLAGS, LDFLAGS
+create_SOURCES = create.c
+
+# Specify subdirectories to build
 DIST_SUBDIRS = ${external_subdirs} .
 
-# build the current directory
+# Build the current directory
 SUBDIRS = ${external_subdirs} .
-
-# gather HEADERS, SOURCES, CPPFLAGS
-lib_LTLIBRARIES = lib/lib@UTILIBNAME@.la
-lib_lib@UTILIBNAME@_la_LIBADD = $(external_libs)
-lib_lib@UTILIBNAME@_la_LDFLAGS = $(external_ldflags) $(ABIVERSIONFLAGS)
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+all: all-recursive
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/src/Makefile.mk $(top_srcdir)/src/linux/Makefile.mk $(top_srcdir)/src/mckernel/Makefile.mk $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -534,7 +437,6 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(top_srcdir)/src/Makefile.mk $(top_srcdir)/src/linux/Makefile.mk $(top_srcdir)/src/mckernel/Makefile.mk:
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -545,87 +447,20 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
 
-src/include/config.h: src/include/stamp-h1
-	@if test ! -f $@; then rm -f src/include/stamp-h1; else :; fi
-	@if test ! -f $@; then $(MAKE) $(AM_MAKEFLAGS) src/include/stamp-h1; else :; fi
+include/config.h: include/stamp-h1
+	@if test ! -f $@; then rm -f include/stamp-h1; else :; fi
+	@if test ! -f $@; then $(MAKE) $(AM_MAKEFLAGS) include/stamp-h1; else :; fi
 
-src/include/stamp-h1: $(top_srcdir)/src/include/config.h.in $(top_builddir)/config.status
-	@rm -f src/include/stamp-h1
-	cd $(top_builddir) && $(SHELL) ./config.status src/include/config.h
-$(top_srcdir)/src/include/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
+include/stamp-h1: $(top_srcdir)/include/config.h.in $(top_builddir)/config.status
+	@rm -f include/stamp-h1
+	cd $(top_builddir) && $(SHELL) ./config.status include/config.h
+$(top_srcdir)/include/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
 	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
-	rm -f src/include/stamp-h1
+	rm -f include/stamp-h1
 	touch $@
 
 distclean-hdr:
-	-rm -f src/include/config.h src/include/stamp-h1
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-
-install-libLTLIBRARIES: $(lib_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
-	list2=; for p in $$list; do \
-	  if test -f $$p; then \
-	    list2="$$list2 $$p"; \
-	  else :; fi; \
-	done; \
-	test -z "$$list2" || { \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(libdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(libdir)" || exit 1; \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
-	}
-
-uninstall-libLTLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
-	for p in $$list; do \
-	  $(am__strip_dir) \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
-	done
-
-clean-libLTLIBRARIES:
-	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
-	@list='$(lib_LTLIBRARIES)'; \
-	locs=`for p in $$list; do echo $$p; done | \
-	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
-	      sort -u`; \
-	test -z "$$locs" || { \
-	  echo rm -f $${locs}; \
-	  rm -f $${locs}; \
-	}
-src/$(am__dirstamp):
-	@$(MKDIR_P) src
-	@: > src/$(am__dirstamp)
-src/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) src/$(DEPDIR)
-	@: > src/$(DEPDIR)/$(am__dirstamp)
-src/common.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
-src/linux/$(am__dirstamp):
-	@$(MKDIR_P) src/linux
-	@: > src/linux/$(am__dirstamp)
-src/linux/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) src/linux/$(DEPDIR)
-	@: > src/linux/$(DEPDIR)/$(am__dirstamp)
-src/linux/uti.lo: src/linux/$(am__dirstamp) \
-	src/linux/$(DEPDIR)/$(am__dirstamp)
-src/mckernel/$(am__dirstamp):
-	@$(MKDIR_P) src/mckernel
-	@: > src/mckernel/$(am__dirstamp)
-src/mckernel/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) src/mckernel/$(DEPDIR)
-	@: > src/mckernel/$(DEPDIR)/$(am__dirstamp)
-src/mckernel/uti.lo: src/mckernel/$(am__dirstamp) \
-	src/mckernel/$(DEPDIR)/$(am__dirstamp)
-lib/$(am__dirstamp):
-	@$(MKDIR_P) lib
-	@: > lib/$(am__dirstamp)
-
-lib/lib@UTILIBNAME@.la: $(lib_lib@UTILIBNAME@_la_OBJECTS) $(lib_lib@UTILIBNAME@_la_DEPENDENCIES) $(EXTRA_lib_lib@UTILIBNAME@_la_DEPENDENCIES) lib/$(am__dirstamp)
-	$(AM_V_CCLD)$(lib_lib@UTILIBNAME@_la_LINK) -rpath $(libdir) $(lib_lib@UTILIBNAME@_la_OBJECTS) $(lib_lib@UTILIBNAME@_la_LIBADD) $(LIBS)
+	-rm -f include/config.h include/stamp-h1
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -675,57 +510,18 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-install-binSCRIPTS: $(bin_SCRIPTS)
-	@$(NORMAL_INSTALL)
-	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n' \
-	    -e 'h;s|.*|.|' \
-	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
-	      if (++n[d] == $(am__install_max)) { \
-		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
-	    else { print "f", d "/" $$4, $$1 } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	     test -z "$$files" || { \
-	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
-	     } \
-	; done
 
-uninstall-binSCRIPTS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || exit 0; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	       sed -e 's,.*/,,;$(transform)'`; \
-	dir='$(DESTDIR)$(bindir)'; $(am__uninstall_files_from_dir)
+create$(EXEEXT): $(create_OBJECTS) $(create_DEPENDENCIES) $(EXTRA_create_DEPENDENCIES) 
+	@rm -f create$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(create_OBJECTS) $(create_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f src/*.$(OBJEXT)
-	-rm -f src/*.lo
-	-rm -f src/linux/*.$(OBJEXT)
-	-rm -f src/linux/*.lo
-	-rm -f src/mckernel/*.$(OBJEXT)
-	-rm -f src/mckernel/*.lo
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/common.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/linux/$(DEPDIR)/uti.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/mckernel/$(DEPDIR)/uti.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/create.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -756,76 +552,9 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-	-rm -rf lib/.libs lib/_libs
-	-rm -rf src/.libs src/_libs
-	-rm -rf src/linux/.libs src/linux/_libs
-	-rm -rf src/mckernel/.libs src/mckernel/_libs
 
 distclean-libtool:
 	-rm -f libtool config.lt
-install-sysconfDATA: $(sysconf_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(sysconf_DATA)'; test -n "$(sysconfdir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(sysconfdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(sysconfdir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(sysconfdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(sysconfdir)" || exit $$?; \
-	done
-
-uninstall-sysconfDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(sysconf_DATA)'; test -n "$(sysconfdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(sysconfdir)'; $(am__uninstall_files_from_dir)
-install-includeHEADERS: $(include_HEADERS)
-	@$(NORMAL_INSTALL)
-	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(includedir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(includedir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(includedir)'"; \
-	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
-	done
-
-uninstall-includeHEADERS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(includedir)'; $(am__uninstall_files_from_dir)
-install-nodist_includeHEADERS: $(nodist_include_HEADERS)
-	@$(NORMAL_INSTALL)
-	@list='$(nodist_include_HEADERS)'; test -n "$(includedir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(includedir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(includedir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(includedir)'"; \
-	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
-	done
-
-uninstall-nodist_includeHEADERS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(nodist_include_HEADERS)'; test -n "$(includedir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(includedir)'; $(am__uninstall_files_from_dir)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.
@@ -1115,19 +844,14 @@ distcleancheck: distclean
 	       $(distcleancheck_listfiles) ; \
 	       exit 1; } >&2
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-recursive
-all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS) \
-		$(DATA) $(HEADERS)
-install-binPROGRAMS: install-libLTLIBRARIES
-
+check: check-recursive
+all-am: Makefile $(PROGRAMS) $(HEADERS)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(sysconfdir)" "$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"; do \
+	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-recursive
+install: install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
 uninstall: uninstall-recursive
@@ -1149,35 +873,25 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f lib/$(am__dirstamp)
-	-rm -f src/$(DEPDIR)/$(am__dirstamp)
-	-rm -f src/$(am__dirstamp)
-	-rm -f src/linux/$(DEPDIR)/$(am__dirstamp)
-	-rm -f src/linux/$(am__dirstamp)
-	-rm -f src/mckernel/$(DEPDIR)/$(am__dirstamp)
-	-rm -f src/mckernel/$(am__dirstamp)
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-noinstLIBRARIES mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf src/$(DEPDIR) src/linux/$(DEPDIR) src/mckernel/$(DEPDIR)
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-hdr distclean-libtool distclean-local distclean-tags
+	distclean-hdr distclean-libtool distclean-tags
 
 dvi: dvi-recursive
 
@@ -1191,14 +905,13 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-includeHEADERS install-nodist_includeHEADERS
+install-data-am:
 
 install-dvi: install-dvi-recursive
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS install-binSCRIPTS \
-	install-libLTLIBRARIES install-sysconfDATA
+install-exec-am: install-binPROGRAMS
 
 install-html: install-html-recursive
 
@@ -1223,7 +936,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf src/$(DEPDIR) src/linux/$(DEPDIR) src/mckernel/$(DEPDIR)
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -1240,46 +953,28 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
-	uninstall-includeHEADERS uninstall-libLTLIBRARIES \
-	uninstall-nodist_includeHEADERS uninstall-sysconfDATA
+uninstall-am: uninstall-binPROGRAMS
 
-.MAKE: $(am__recursive_targets) all check install install-am \
-	install-strip
+.MAKE: $(am__recursive_targets) install-am install-strip
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
 	am--refresh check check-am clean clean-binPROGRAMS \
-	clean-cscope clean-generic clean-libLTLIBRARIES clean-libtool \
-	clean-noinstLIBRARIES cscope cscopelist-am ctags ctags-am dist \
-	dist-all dist-bzip2 dist-gzip dist-lzip dist-shar dist-tarZ \
-	dist-xz dist-zip distcheck distclean distclean-compile \
-	distclean-generic distclean-hdr distclean-libtool \
-	distclean-local distclean-tags distcleancheck distdir \
+	clean-cscope clean-generic clean-libtool cscope cscopelist-am \
+	ctags ctags-am dist dist-all dist-bzip2 dist-gzip dist-lzip \
+	dist-shar dist-tarZ dist-xz dist-zip distcheck distclean \
+	distclean-compile distclean-generic distclean-hdr \
+	distclean-libtool distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-binSCRIPTS \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-includeHEADERS install-info install-info-am \
-	install-libLTLIBRARIES install-man \
-	install-nodist_includeHEADERS install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip install-sysconfDATA \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-binSCRIPTS \
-	uninstall-includeHEADERS uninstall-libLTLIBRARIES \
-	uninstall-nodist_includeHEADERS uninstall-sysconfDATA
+	install install-am install-binPROGRAMS install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS
 
-
-# the configure step checks for the 'lib' dir to decide whether a source 
-# directory has been previously used for an in-path build before allowing a
-# VPATH build to continue
-distclean-local:
-	-rm -rf $(top_builddir)/lib
-	-rm -rf $(top_builddir)/bin
-	-rm -rf $(top_builddir)/include
-	-rm -rf $(top_builddir)/share
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -19,35 +19,17 @@ fi
 CONFIGURE_ARGS_CLEAN=`echo $* | tr '"' ' '`
 AC_SUBST(CONFIGURE_ARGS_CLEAN)
 
-UTI_VERSION=UTI_VERSION_m4
-AC_SUBST([UTI_VERSION])
-UTI_RELEASE_DATE="UTI_RELEASE_DATE_m4"
-AC_SUBST([UTI_RELEASE_DATE])
-libuti_so_version="libuti_so_version_m4"
-AC_SUBST([libuti_so_version])
-
-if test -z "$UTI_VERSION" ; then
-   AC_MSG_ERROR([UTI_VERSION is empty, check maint/version.m4 for errors])
-fi
-
-# ABIvERSION is the name used by simplemake, so we reassign the
-# liblcc_so_version number to it
-ABIVERSION=${liblcc_so_version}
-export ABIVERSION
-export liblcc_so_version
-AC_SUBST(ABIVERSION)
-
 # print out the configure options
 CONFIGURE_ARGUMENTS="$ac_configure_args"
 AC_SUBST(CONFIGURE_ARGUMENTS)
 if test -n "$ac_configure_args" ; then
-    echo "Configuring UTI version $UTI_VERSION with $ac_configure_args"
+    echo "Configuring uti/test with $ac_configure_args"
 else
-    echo "Configuring UTI version $UTI_VERSION"
+    echo "Configuring uti/test"
 fi
 
 # config.h location and templates
-AC_CONFIG_HEADER([src/include/config.h])
+AC_CONFIG_HEADER([include/config.h])
 
 AH_TOP([/* 
  * \file config.h
@@ -69,43 +51,23 @@ AC_CONFIG_AUX_DIR(confdb)
 dnl our macro dir is the same as our aux dir
 AC_CONFIG_MACRO_DIR([confdb])
 
-# tell subconfigures that they are built from within UTI
-FROM_UTI=yes
-export FROM_UTI
-
 # Save a copy of precious flags as USER_* before any of these flags
 # are being modified by configure tests.
 PAC_PREFIX_ALL_FLAGS(USER)
 
-# Add UTILIB_* to the appropriate flags
-AC_ARG_VAR(UTILIB_CFLAGS,
+# Add UTITEST_* to the appropriate flags
+AC_ARG_VAR(UTITEST_CFLAGS,
 	[extra CFLAGS used in building UTI libraries])
-AC_ARG_VAR(UTILIB_CPPFLAGS,
+AC_ARG_VAR(UTITEST_CPPFLAGS,
 	[extra CPPFLAGS used in building UTI libraries])
-AC_ARG_VAR(UTILIB_LDFLAGS,
+AC_ARG_VAR(UTITEST_LDFLAGS,
 	[extra LDFLAGS used in building UTI libraries])
 AC_ARG_VAR(UTI_LIBS,
 	[extra LIBS used in building UTI libraries])
-CFLAGS="$CFLAGS $UTILIB_CFLAGS"
-CPPFLAGS="$CPPFLAGS $UTILIB_CPPFLAGS"
-LDFLAGS="$LDFLAGS $UTILIB_LDFLAGS"
-LIBS="$LIBS $UTILIB_LIBS"
-
-# Include subconfigure.m4
-m4_include([src/linux/subconfigure.m4])
-m4_include([src/mckernel/subconfigure.m4])
-
-# List of directories of subconfigure.m4
-m4_define([PAC_SUBCFG_MODULE_LIST],
-m4_dquote(
-[src_linux],
-[src_mckernel]dnl <--- this dnl is important
-))
-
-# Add MPI_PATH
-AC_ARG_VAR(MPI_PATH, [MPI install directory])
-
-#m4_include([debug.m4])
+CFLAGS="$CFLAGS $UTITEST_CFLAGS"
+CPPFLAGS="$CPPFLAGS $UTITEST_CPPFLAGS"
+LDFLAGS="$LDFLAGS $UTITEST_LDFLAGS"
+LIBS="$LIBS $UTITEST_LIBS"
 
 dnl -----
 dnl setup top-level argument handling
@@ -161,10 +123,6 @@ LT_INIT()
 # make "make" silent
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
-dnl do not attempt to place shell conditionals (either manually or via
-dnl AS_IF) around these macros in an effort to save configure time. It will
-dnl lead to weird AM_CONDITIONAL erros and potentially other problems.
-
 # compute canonical build/host system type variable
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
@@ -175,9 +133,6 @@ PAC_ARG_CACHING
 # Set CFLAGS such as "-Wstrict-prototypes". Do this *first* because
 # it may influence the output of the other tests
 PAC_ARG_STRICT
-
-# First check that we have a clean build if we are doing a VPATH build
-# PAC_VPATH_CHECK(src/include/uti.h, lib)
 
 # This test is complicated by the fact that top_srcdir is not set until
 # the very end of configure. Instead, we get it ourselves.
@@ -205,8 +160,10 @@ AC_SUBST(master_top_srcdir)
 export master_top_builddir
 export master_top_srcdir
 
-AC_ARG_VAR([UTILIBNAME],[can be used to override the name of the UTI library (default: "uti")])
-UTILIBNAME=${UTILIBNAME:-"uti"}
+# export prefix to Makefile.am
+PROGNAME=uti_test
+AC_SUBST(PROGNAME)
+
 
 # Set up default optimization level of compiler
 UTI_DEFAULT_COPTS="-O2"
@@ -325,22 +282,6 @@ AC_C_VOLATILE
 AC_C_RESTRICT
 AC_C_INLINE
 
-AC_SUBST(UTILIBNAME)
-
-dnl configure any subdirectories. Note that config.status will *not*
-dnl reexecute these!
-dnl export any important variables first.
-dnl invoke the configure scripts in subdirectories directly.
-export AR
-export AR_FLAGS
-export RANLIB
-export UTILIBNAME
-export CC
-export CPPFLAGS
-export LIBS
-export CFLAGS
-export LDFLAGS
-
 # update the cache first with the results of the previous configure steps
 PAC_CREATE_BASE_CACHE
 
@@ -355,30 +296,14 @@ else
 fi
 AC_SUBST([mpich_libtool_static_flag])
 
+# export prefix to Makefile.am
+AC_SUBST(prefix)
+
 # UTI_SRCDIR gives the test/mpi configure the location of the source
 # files for an UTI implementation
 if test -n "$ac_abs_srcdir" ; then
-    UTI_SRCDIR=$ac_abs_srcdir
+    MPI_SRCDIR=$ac_abs_srcdir
 fi
-
-# ???
-if test -z "$includebuild_dir" ; then
-    includebuild_dir=`pwd`/src/include
-fi
-if test -z "$libbuild_dir" ;  then
-    libbuild_dir=`pwd`/lib
-fi
-
-
-# the following make these definitions:
-# define _UINT<n>_T 1
-# if uint<n>_t is available
-# if not available, define uint<n>_t as the releate C type, e.g.,
-# define uint8_t unsigned char
-AC_TYPE_UINT8_T
-AC_TYPE_UINT16_T
-AC_TYPE_UINT32_T
-AC_TYPE_UINT64_T
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h stdlib.h string.h unistd.h])
@@ -396,15 +321,6 @@ date > lib/newconfig])
 WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS $LDFLAGS"
 WRAPPER_LIBS="$WRAPPER_LIBS $LIBS"
 
-# Run PREREQ part of subconfigure.m4
-m4_map([PAC_SUBCFG_DO_PREREQ], [PAC_SUBCFG_MODULE_LIST])
-
-# Run BODY part of subconfigure.m4
-m4_map([PAC_SUBCFG_CONFIGURE_SUBSYS], [PAC_SUBCFG_MODULE_LIST])
-
-# uti test suite
-AC_CONFIG_SUBDIRS([test])
-
 #################################################################################
 # cause libtool script to be built now so that we can use it to test one last
 # linking issue on Darwin
@@ -413,4 +329,3 @@ LT_OUTPUT
 AC_CONFIG_FILES([Makefile
                  ])
 AC_OUTPUT
-

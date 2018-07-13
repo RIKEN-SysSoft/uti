@@ -4,6 +4,7 @@ ACLOCAL_AMFLAGS = -I confdb
 # automake requires that we initialize variables to something, even just empty,
 # before appending to them with "+="
 AM_CPPFLAGS = 
+AM_LDFLAGS = 
 include_HEADERS = 
 lib_lib@UTILIBNAME@_la_SOURCES =
 nodist_include_HEADERS =
