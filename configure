@@ -637,11 +637,13 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
 subdirs
+with_hwloc
+with_cap
 BUILD_MCKERNEL_FALSE
 BUILD_MCKERNEL_TRUE
 BUILD_LINUX_FALSE
 BUILD_LINUX_TRUE
-mpich_libtool_static_flag
+uti_libtool_static_flag
 BASH_SHELL
 SET_CFLAGS
 VPATH
@@ -729,7 +731,7 @@ CPPFLAGS
 LDFLAGS
 CFLAGS
 CC
-with_os
+with_rm
 MPI_PATH
 UTI_LIBS
 UTILIB_LDFLAGS
@@ -791,7 +793,7 @@ ac_user_opts='
 enable_option_checking
 enable_g
 enable_fast
-with_os
+with_rm
 enable_dependency_tracking
 enable_silent_rules
 enable_maintainer_mode
@@ -806,6 +808,9 @@ enable_libtool_lock
 enable_cache
 enable_strict
 enable_base_cache
+with_cap
+with_cap_include
+with_cap_lib
 with_hwloc
 with_hwloc_include
 with_hwloc_lib
@@ -1478,7 +1483,8 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-os               Specify OS
+  --with-rm               Specify resource manager used, e.g. linux, mckernel,
+                          mos, etc.
   --with-pic[=PKGS]       try to use only PIC/non-PIC objects [default=use
                           both]
   --with-aix-soname=aix|svr4|both
@@ -1487,6 +1493,11 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
+  --with-cap=PATH         specify path where cap include directory and lib
+                          directory can be found
+  --with-cap-include=PATH specify path where cap include directory can be
+                          found
+  --with-cap-lib=PATH     specify path where cap lib directory can be found
   --with-hwloc=PATH       specify path where hwloc include directory and lib
                           directory can be found
   --with-hwloc-include=PATH
@@ -2669,7 +2680,7 @@ LIBS="$LIBS $UTILIB_LIBS"
 if test "${enable_g+set}" = set; then :
   enableval=$enable_g;
 else
-  enable_g=none
+  enable_g=dbg
 fi
 
 
@@ -2681,23 +2692,26 @@ else
 fi
 
 
-# Define with_os
+# Define with_rm
 
-# Check whether --with-os was given.
-if test "${with_os+set}" = set; then :
-  withval=$with_os;
+# Check whether --with-rm was given.
+if test "${with_rm+set}" = set; then :
+  withval=$with_rm;
 else
-  with_os=linux
+  with_rm=linux
 fi
 
 
-# Export with_os to Makefile.am
+# Export with_rm to Makefile.am
 
 
-# Export with_os to subconfigure.m4
-export with_os
+# Export with_rm to subconfigure.m4
+export with_rm
 
 # Find a C compiler.
+# Expand $ac_aux_dir to an absolute path.
+am_aux_dir=`cd "$ac_aux_dir" && pwd`
+
 
 
 	if test -z "${pac_save_CFLAGS_nesting}" ; then
@@ -3303,6 +3317,65 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC understands -c and -o together" >&5
+$as_echo_n "checking whether $CC understands -c and -o together... " >&6; }
+if ${am_cv_prog_cc_c_o+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+  # Make sure it works both with $CC and with simple cc.
+  # Following AC_PROG_CC_C_O, we do the test twice because some
+  # compilers refuse to overwrite an existing .o file with -o,
+  # though they will create one.
+  am_cv_prog_cc_c_o=yes
+  for am_i in 1 2; do
+    if { echo "$as_me:$LINENO: $CC -c conftest.$ac_ext -o conftest2.$ac_objext" >&5
+   ($CC -c conftest.$ac_ext -o conftest2.$ac_objext) >&5 2>&5
+   ac_status=$?
+   echo "$as_me:$LINENO: \$? = $ac_status" >&5
+   (exit $ac_status); } \
+         && test -f conftest2.$ac_objext; then
+      : OK
+    else
+      am_cv_prog_cc_c_o=no
+      break
+    fi
+  done
+  rm -f core conftest*
+  unset am_i
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_prog_cc_c_o" >&5
+$as_echo "$am_cv_prog_cc_c_o" >&6; }
+if test "$am_cv_prog_cc_c_o" != yes; then
+   # Losing compiler, so override with the script.
+   # FIXME: It is wrong to rewrite CC.
+   # But if we don't then we get into trouble of one sort or another.
+   # A longer-term fix would be to have automake use am__CC in this case,
+   # and then we could set am__CC="\$(top_srcdir)/compile \$(CC)"
+   CC="$am_aux_dir/compile $CC"
+fi
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
 
 	pac_save_CFLAGS_nesting=`expr ${pac_save_CFLAGS_nesting} - 1`
 	eval CFLAGS="\$pac_save_CFLAGS_${pac_save_CFLAGS_nesting}"
@@ -3576,7 +3649,7 @@ fi
 	eval pac_save_CFLAGS_${pac_save_CFLAGS_nesting}=""
 
 
-am__api_version='1.13'
+am__api_version='1.15'
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
@@ -3748,9 +3821,6 @@ test "$program_suffix" != NONE &&
 ac_script='s/[\\$]/&&/g;s/;s,x,x,$//'
 program_transform_name=`$as_echo "$program_transform_name" | sed "$ac_script"`
 
-# expand $ac_aux_dir to an absolute path
-am_aux_dir=`cd $ac_aux_dir && pwd`
-
 if test x"${MISSING+set}" != xset; then
   case $am_aux_dir in
   *\ * | *\	*)
@@ -3768,7 +3838,7 @@ else
 $as_echo "$as_me: WARNING: 'missing' script is too old or missing" >&2;}
 fi
 
-if test x"${install_sh}" != xset; then
+if test x"${install_sh+set}" != xset; then
   case $am_aux_dir in
   *\ * | *\	*)
     install_sh="\${SHELL} '$am_aux_dir/install-sh'" ;;
@@ -4159,8 +4229,8 @@ MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
 # <http://lists.gnu.org/archive/html/automake/2012-07/msg00014.html>
 mkdir_p='$(MKDIR_P)'
 
-# We need awk for the "check" target.  The system "awk" is bad on
-# some platforms.
+# We need awk for the "check" target (and possibly the TAP driver).  The
+# system "awk" is bad on some platforms.
 # Always define AMTAR for backward compatibility.  Yes, it's still used
 # in the wild :-(  We should find a proper way to deprecate it ...
 AMTAR='$${TAR-tar}'
@@ -4304,6 +4374,48 @@ fi
 
 
 
+# POSIX will say in a future version that running "rm -f" with no argument
+# is OK; and we want to be able to make that assumption in our Makefile
+# recipes.  So use an aggressive probe to check that the usage we want is
+# actually supported "in the wild" to an acceptable degree.
+# See automake bug#10828.
+# To make any issue more visible, cause the running configure to be aborted
+# by default if the 'rm' program in use doesn't match our expectations; the
+# user can still override this though.
+if rm -f && rm -fr && rm -rf; then : OK; else
+  cat >&2 <<'END'
+Oops!
+
+Your 'rm' program seems unable to run without file operands specified
+on the command line, even when the '-f' option is present.  This is contrary
+to the behaviour of most rm programs out there, and not conforming with
+the upcoming POSIX standard: <http://austingroupbugs.net/view.php?id=542>
+
+Please tell bug-automake@gnu.org about your system, including the value
+of your $PATH and any error possibly output before this message.  This
+can help us improve future automake versions.
+
+END
+  if test x"$ACCEPT_INFERIOR_RM_PROGRAM" = x"yes"; then
+    echo 'Configuration will proceed anyway, since you have set the' >&2
+    echo 'ACCEPT_INFERIOR_RM_PROGRAM variable to "yes"' >&2
+    echo >&2
+  else
+    cat >&2 <<'END'
+Aborting the configuration process, to ensure you take notice of the issue.
+
+You can download and install GNU coreutils to get an 'rm' implementation
+that behaves properly: <http://www.gnu.org/software/coreutils/>.
+
+If you want to complete the configuration process using your problematic
+'rm' anyway, export the environment variable ACCEPT_INFERIOR_RM_PROGRAM
+to "yes", and re-run configure.
+
+END
+    as_fn_error $? "Your 'rm' program is bad, sorry." "$LINENO" 5
+  fi
+fi
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable maintainer-specific portions of Makefiles" >&5
 $as_echo_n "checking whether to enable maintainer-specific portions of Makefiles... " >&6; }
@@ -4436,7 +4548,13 @@ $as_echo_n "checking the archiver ($AR) interface... " >&6; }
 if ${am_cv_ar_interface+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  am_cv_ar_interface=ar
+  ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+   am_cv_ar_interface=ar
    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 int some_variable = 0;
@@ -4467,6 +4585,11 @@ if ac_fn_c_try_compile "$LINENO"; then :
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+   ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_ar_interface" >&5
@@ -13333,6 +13456,7 @@ for option in $enable_fast ; do
     case "$option" in
          defopt)
          enable_default_optimize=yes
+    	 UTI_DEFAULT_COPTS="-O0"
 	 ;;
     	 O*)
          enable_default_optimize=yes
@@ -14341,11 +14465,11 @@ else
 fi
 
 
-# UTI_SRCDIR gives the test/mpi configure the location of the source
-# files for an UTI implementation
-if test -n "$ac_abs_srcdir" ; then
-    UTI_SRCDIR=$ac_abs_srcdir
-fi
+# Export uti_{src,build}dir to test/configure.ac
+uti_srcdir=$master_top_srcdir
+uti_builddir=$master_top_builddir
+export uti_srcdir
+export uti_builddir
 
 # ???
 if test -z "$includebuild_dir" ; then
@@ -14447,16 +14571,12 @@ fi
 ac_config_commands="$ac_config_commands default-1"
 
 
-# add the LDFLAGS/LIBS we got so far to WRAPPERs
-WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS $LDFLAGS"
-WRAPPER_LIBS="$WRAPPER_LIBS $LIBS"
-
 # Run PREREQ part of subconfigure.m4
 
 ## begin expansion of PAC_SUBCFG_PREREQ_src_linux
 
 	# Define BUILD_LINUX used in Makefile.mk
-	 if test "X$with_os" = "Xlinux"; then
+	 if test "X$with_rm" = "Xlinux"; then
   BUILD_LINUX_TRUE=
   BUILD_LINUX_FALSE='#'
 else
@@ -14470,7 +14590,7 @@ fi
 ## begin expansion of PAC_SUBCFG_PREREQ_src_mckernel
 
 	# Define BUILD_MCKERNEL used in Makefile.mk
-	 if test "X$with_os" = "Xmckernel"; then
+	 if test "X$with_rm" = "Xmckernel"; then
   BUILD_MCKERNEL_TRUE=
   BUILD_MCKERNEL_FALSE='#'
 else
@@ -14489,21 +14609,191 @@ fi
 # BUILD_LINUX is set above
 if test -z "$BUILD_LINUX_TRUE"; then :
 
+
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: RUNNING CONFIGURE FOR LINUX" >&5
 $as_echo "$as_me: RUNNING CONFIGURE FOR LINUX" >&6;}
 
-	ac_fn_c_check_header_mongrel "$LINENO" "sys/capability.h" "ac_cv_header_sys_capability_h" "$ac_includes_default"
-if test "x$ac_cv_header_sys_capability_h" = xyes; then :
-  libcap_found=yes
+	# Append cap path to CPPFLAGS and LDFLAGS via --with-cap=<path>
+
+
+# Check whether --with-cap was given.
+if test "${with_cap+set}" = set; then :
+  withval=$with_cap; case "$withval" in #(
+  yes|no|'') :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --without-cap=PATH expects a valid PATH" >&5
+$as_echo "$as_me: WARNING: --without-cap=PATH expects a valid PATH" >&2;}
+                          with_cap="" ;; #(
+  *) :
+     ;;
+esac
 else
-  libcap_found=no
+  with_cap=
 fi
 
 
-	if test "x$libcap_found" != "xyes"; then :
-  as_fn_error $? "Unable to find sys/capability.h, missing libcap-devel?" "$LINENO" 5
+# Check whether --with-cap-include was given.
+if test "${with_cap_include+set}" = set; then :
+  withval=$with_cap_include; case "$withval" in #(
+  yes|no|'') :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --without-cap-include=PATH expects a valid PATH" >&5
+$as_echo "$as_me: WARNING: --without-cap-include=PATH expects a valid PATH" >&2;}
+                          with_cap_include="" ;; #(
+  *) :
+     ;;
+esac
 fi
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for cap_get_proc in -lcap" >&5
+
+
+# Check whether --with-cap-lib was given.
+if test "${with_cap_lib+set}" = set; then :
+  withval=$with_cap_lib; case "$withval" in #(
+  yes|no|'') :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --without-cap-lib=PATH expects a valid PATH" >&5
+$as_echo "$as_me: WARNING: --without-cap-lib=PATH expects a valid PATH" >&2;}
+                          with_cap_lib="" ;; #(
+  *) :
+     ;;
+esac
+fi
+
+
+    # The args have been sanitized into empty/non-empty values above.
+    # Now append -I/-L args to CPPFLAGS/LDFLAGS, with more specific options
+    # taking priority
+
+    if test -n "${with_cap_include}"; then :
+
+
+	if echo "$CPPFLAGS" | $FGREP -e '-I${with_cap_include}' >/dev/null 2>&1; then :
+  echo "CPPFLAGS(='$CPPFLAGS') contains '-I${with_cap_include}', not appending" >&5
+else
+  echo "CPPFLAGS(='$CPPFLAGS') does not contain '-I${with_cap_include}', appending" >&5
+		CPPFLAGS="$CPPFLAGS -I${with_cap_include}"
+
+fi
+
+
+
+	if echo "$WRAPPER_CPPFLAGS" | $FGREP -e '-I${with_cap_include}' >/dev/null 2>&1; then :
+  echo "WRAPPER_CPPFLAGS(='$WRAPPER_CPPFLAGS') contains '-I${with_cap_include}', not appending" >&5
+else
+  echo "WRAPPER_CPPFLAGS(='$WRAPPER_CPPFLAGS') does not contain '-I${with_cap_include}', appending" >&5
+		WRAPPER_CPPFLAGS="$WRAPPER_CPPFLAGS -I${with_cap_include}"
+
+fi
+
+else
+  if test -n "${with_cap}"; then :
+
+
+	if echo "$CPPFLAGS" | $FGREP -e '-I${with_cap}/include' >/dev/null 2>&1; then :
+  echo "CPPFLAGS(='$CPPFLAGS') contains '-I${with_cap}/include', not appending" >&5
+else
+  echo "CPPFLAGS(='$CPPFLAGS') does not contain '-I${with_cap}/include', appending" >&5
+		CPPFLAGS="$CPPFLAGS -I${with_cap}/include"
+
+fi
+
+
+
+	if echo "$WRAPPER_CPPFLAGS" | $FGREP -e '-I${with_cap}/include' >/dev/null 2>&1; then :
+  echo "WRAPPER_CPPFLAGS(='$WRAPPER_CPPFLAGS') contains '-I${with_cap}/include', not appending" >&5
+else
+  echo "WRAPPER_CPPFLAGS(='$WRAPPER_CPPFLAGS') does not contain '-I${with_cap}/include', appending" >&5
+		WRAPPER_CPPFLAGS="$WRAPPER_CPPFLAGS -I${with_cap}/include"
+
+fi
+
+fi
+fi
+
+    if test -n "${with_cap_lib}"; then :
+
+
+	if echo "$LDFLAGS" | $FGREP -e '-L${with_cap_lib}' >/dev/null 2>&1; then :
+  echo "LDFLAGS(='$LDFLAGS') contains '-L${with_cap_lib}', not appending" >&5
+else
+  echo "LDFLAGS(='$LDFLAGS') does not contain '-L${with_cap_lib}', appending" >&5
+		LDFLAGS="$LDFLAGS -L${with_cap_lib}"
+
+fi
+
+
+
+	if echo "$WRAPPER_LDFLAGS" | $FGREP -e '-L${with_cap_lib}' >/dev/null 2>&1; then :
+  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') contains '-L${with_cap_lib}', not appending" >&5
+else
+  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') does not contain '-L${with_cap_lib}', appending" >&5
+		WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS -L${with_cap_lib}"
+
+fi
+
+else
+  if test -n "${with_cap}"; then :
+
+
+	if echo "$LDFLAGS" | $FGREP -e '-L${with_cap}/lib64' >/dev/null 2>&1; then :
+  echo "LDFLAGS(='$LDFLAGS') contains '-L${with_cap}/lib64', not appending" >&5
+else
+  echo "LDFLAGS(='$LDFLAGS') does not contain '-L${with_cap}/lib64', appending" >&5
+		LDFLAGS="$LDFLAGS -L${with_cap}/lib64"
+
+fi
+
+
+
+	if echo "$WRAPPER_LDFLAGS" | $FGREP -e '-L${with_cap}/lib64' >/dev/null 2>&1; then :
+  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') contains '-L${with_cap}/lib64', not appending" >&5
+else
+  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') does not contain '-L${with_cap}/lib64', appending" >&5
+		WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS -L${with_cap}/lib64"
+
+fi
+
+
+
+	if echo "$LDFLAGS" | $FGREP -e '-L${with_cap}/lib' >/dev/null 2>&1; then :
+  echo "LDFLAGS(='$LDFLAGS') contains '-L${with_cap}/lib', not appending" >&5
+else
+  echo "LDFLAGS(='$LDFLAGS') does not contain '-L${with_cap}/lib', appending" >&5
+		LDFLAGS="$LDFLAGS -L${with_cap}/lib"
+
+fi
+
+
+
+	if echo "$WRAPPER_LDFLAGS" | $FGREP -e '-L${with_cap}/lib' >/dev/null 2>&1; then :
+  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') contains '-L${with_cap}/lib', not appending" >&5
+else
+  echo "WRAPPER_LDFLAGS(='$WRAPPER_LDFLAGS') does not contain '-L${with_cap}/lib', appending" >&5
+		WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS -L${with_cap}/lib"
+
+fi
+
+fi
+fi
+
+
+	# Export with_cap to Makefile.am
+	if test -z "$with_cap"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Link with distro libcap" >&5
+$as_echo "$as_me: Link with distro libcap" >&6;}
+fi
+
+
+	# Check if cap is linkable
+
+
+    failure=no
+    ac_fn_c_check_header_mongrel "$LINENO" "sys/capability.h" "ac_cv_header_sys_capability_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_capability_h" = xyes; then :
+
+else
+  failure=yes
+fi
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for cap_get_proc in -lcap" >&5
 $as_echo_n "checking for cap_get_proc in -lcap... " >&6; }
 if ${ac_cv_lib_cap_cap_get_proc+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -14540,16 +14830,44 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cap_cap_get_proc" >&5
 $as_echo "$ac_cv_lib_cap_cap_get_proc" >&6; }
 if test "x$ac_cv_lib_cap_cap_get_proc" = xyes; then :
-  libcap_found=yes
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBCAP 1
+_ACEOF
+
+  LIBS="-lcap $LIBS"
+
 else
-  libcap_found=no
+  failure=yes
 fi
 
-	if test "x$libcap_found" != "xyes"; then :
-  as_fn_error $? "Unable to find libcap.so, missing libcap-devel?" "$LINENO" 5
-fi
+    if test "$failure" = "no" ; then
+       success=yes
+    else
+       success=no
+    fi
 
-	# Add --with-hwloc=<path> option
+	if test "$success" = "no" ; then
+	   as_fn_error $? "'sys/capability.h or libcap library not found. Did you specify --with-cap= or --with-cap-include= or --with-cap-lib=?'" "$LINENO" 5
+	fi
+
+
+
+fi
+## end expansion of PAC_SUBCFG_BODY_src_linux
+
+## begin expansion of PAC_SUBCFG_BODY_src_mckernel
+
+# BUILD_LINUX is set above
+	if test -z "$BUILD_MCKERNEL_TRUE"; then :
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: RUNNING CONFIGURE FOR MCKERNEL" >&5
+$as_echo "$as_me: RUNNING CONFIGURE FOR MCKERNEL" >&6;}
+
+fi
+## end expansion of PAC_SUBCFG_BODY_src_mckernel
+
+
+# Append hwloc path to CPPFLAGS and LDFLAGS via --with-hwloc=<path>
 
 
 # Check whether --with-hwloc was given.
@@ -14710,7 +15028,7 @@ fi
 fi
 
 
-        # Check if hwloc is linkable
+# Check if hwloc is linkable
 
 
     failure=no
@@ -14780,24 +15098,13 @@ fi
 	fi
 
 
-
-
+# Export with_hwloc to Makefile.am
+if test -z "$with_hwloc"; then :
+  as_fn_error $? "Specify --with-hwloc=<path>" "$LINENO" 5
 fi
-## end expansion of PAC_SUBCFG_BODY_src_linux
-
-## begin expansion of PAC_SUBCFG_BODY_src_mckernel
-
-# BUILD_LINUX is set above
-	if test -z "$BUILD_MCKERNEL_TRUE"; then :
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: RUNNING CONFIGURE FOR MCKERNEL" >&5
-$as_echo "$as_me: RUNNING CONFIGURE FOR MCKERNEL" >&6;}
-
-fi
-## end expansion of PAC_SUBCFG_BODY_src_mckernel
 
 
-# uti test suite
+# Configure test/
 
 
 subdirs="$subdirs test"

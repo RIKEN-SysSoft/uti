@@ -115,7 +115,7 @@ AC_ARG_ENABLE(g,
         none     - No debug compiler flag is appended.
         dbg      - Append -g to compiler flags, which are used
                    for compiling the library. 
-],,enable_g=none)
+],,enable_g=dbg)
 
 AC_ARG_ENABLE(fast,
 [  --enable-fast=option - Control the optimization level. Option is a 
@@ -124,16 +124,16 @@ AC_ARG_ENABLE(fast,
                    for compiling the library.
 ],,enable_fast=defopt)
 
-# Define with_os
-AC_ARG_WITH(os,
-	AC_HELP_STRING([--with-os], [Specify OS]),,
-	with_os=linux)
+# Define with_rm
+AC_ARG_WITH(rm,
+	AC_HELP_STRING([--with-rm], [Specify resource manager used, e.g. linux, mckernel, mos, etc.]),,
+	with_rm=linux)
 
-# Export with_os to Makefile.am
-AC_SUBST(with_os)
+# Export with_rm to Makefile.am
+AC_SUBST(with_rm)
 
-# Export with_os to subconfigure.m4
-export with_os
+# Export with_rm to subconfigure.m4
+export with_rm
 
 # Find a C compiler.
 PAC_PROG_CC
@@ -218,6 +218,7 @@ for option in $enable_fast ; do
     case "$option" in
          defopt)
          enable_default_optimize=yes
+    	 UTI_DEFAULT_COPTS="-O0"
 	 ;;
     	 O*)
          enable_default_optimize=yes
@@ -353,13 +354,13 @@ if test ! -z "$UTI_LIBTOOL_STATIC_FLAG" ; then
 else
     uti_libtool_static_flag="-static"
 fi
-AC_SUBST([mpich_libtool_static_flag])
+AC_SUBST([uti_libtool_static_flag])
 
-# UTI_SRCDIR gives the test/mpi configure the location of the source
-# files for an UTI implementation
-if test -n "$ac_abs_srcdir" ; then
-    UTI_SRCDIR=$ac_abs_srcdir
-fi
+# Export uti_{src,build}dir to test/configure.ac
+uti_srcdir=$master_top_srcdir
+uti_builddir=$master_top_builddir
+export uti_srcdir
+export uti_builddir
 
 # ???
 if test -z "$includebuild_dir" ; then
@@ -392,17 +393,24 @@ dnl a build aborts due to an error (this is intended to help developers)
 AC_OUTPUT_COMMANDS([if [ ! -d lib ] ;  then mkdir lib; fi
 date > lib/newconfig])
 
-# add the LDFLAGS/LIBS we got so far to WRAPPERs
-WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS $LDFLAGS"
-WRAPPER_LIBS="$WRAPPER_LIBS $LIBS"
-
 # Run PREREQ part of subconfigure.m4
 m4_map([PAC_SUBCFG_DO_PREREQ], [PAC_SUBCFG_MODULE_LIST])
 
 # Run BODY part of subconfigure.m4
 m4_map([PAC_SUBCFG_CONFIGURE_SUBSYS], [PAC_SUBCFG_MODULE_LIST])
 
-# uti test suite
+# Append hwloc path to CPPFLAGS and LDFLAGS via --with-hwloc=<path>
+PAC_SET_HEADER_LIB_PATH(hwloc)
+
+# Check if hwloc is linkable
+PAC_CHECK_HEADER_LIB_FATAL(hwloc, hwloc.h, hwloc, hwloc_topology_init)
+
+# Export with_hwloc to Makefile.am
+AS_IF([test -z "$with_hwloc"],
+	[AC_MSG_ERROR([Specify --with-hwloc=<path>])])
+AC_SUBST(with_hwloc)
+
+# Configure test/
 AC_CONFIG_SUBDIRS([test])
 
 #################################################################################

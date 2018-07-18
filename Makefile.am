@@ -3,7 +3,7 @@ ACLOCAL_AMFLAGS = -I confdb
 
 # automake requires that we initialize variables to something, even just empty,
 # before appending to them with "+="
-AM_CPPFLAGS = 
+AM_CPPFLAGS = -Wall 
 AM_LDFLAGS = 
 include_HEADERS = 
 lib_lib@UTILIBNAME@_la_SOURCES =
@@ -21,7 +21,6 @@ sysconf_DATA =
 CLEANFILES =
 DISTCLEANFILES =
 SUFFIXES = 
-EXTRA_DIST =
 DOC_SUBDIRS =
 MANDOC_SUBDIRS =
 HTMLDOC_SUBDIRS =
@@ -31,9 +30,6 @@ INSTALL_DATA_LOCAL_TARGETS =
 # clean-local target
 CLEAN_LOCAL_TARGETS =
 
-DIST_SUBDIRS = ${external_subdirs}
-SUBDIRS = ${external_subdirs}
-
 # gather HEADERS, SOURCES, CPPFLAGS
 include $(top_srcdir)/src/Makefile.mk
 
@@ -41,11 +37,14 @@ lib_LTLIBRARIES = lib/lib@UTILIBNAME@.la
 lib_lib@UTILIBNAME@_la_LIBADD = $(external_libs)
 lib_lib@UTILIBNAME@_la_LDFLAGS = $(external_ldflags) $(ABIVERSIONFLAGS)
 
-# build the current directory
-SUBDIRS += .
-DIST_SUBDIRS += .
+# Specify directories to build
+SUBDIRS = . test
 
-EXTRA_DIST += README CHANGES COPYRIGHT
+# Specify directories to distribute
+DIST_SUBDIRS = .
+
+# Specify files to distribute but not covered automatically
+EXTRA_DIST = README LICENSE RELEASE CONTRIBUTORS
 
 # the configure step checks for the 'lib' dir to decide whether a source 
 # directory has been previously used for an in-path build before allowing a

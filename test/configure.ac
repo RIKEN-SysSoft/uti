@@ -29,7 +29,7 @@ else
 fi
 
 # config.h location and templates
-AC_CONFIG_HEADER([include/config.h])
+AC_CONFIG_HEADER([src/include/config.h])
 
 AH_TOP([/* 
  * \file config.h
@@ -77,7 +77,7 @@ AC_ARG_ENABLE(g,
         none     - No debug compiler flag is appended.
         dbg      - Append -g to compiler flags, which are used
                    for compiling the library. 
-],,enable_g=none)
+],,enable_g=dbg)
 
 AC_ARG_ENABLE(fast,
 [  --enable-fast=option - Control the optimization level. Option is a 
@@ -86,16 +86,19 @@ AC_ARG_ENABLE(fast,
                    for compiling the library.
 ],,enable_fast=defopt)
 
-# Define with_os
-AC_ARG_WITH(os,
-	AC_HELP_STRING([--with-os], [Specify OS]),,
-	with_os=linux)
+# Define with_rm
+AC_ARG_WITH(rm,
+	AC_HELP_STRING([--with-rm], [Specify resource manager used, e.g. linux, mckernel, mos, etc.]),,
+	with_rm=linux)
 
-# Export with_os to Makefile.am
-AC_SUBST(with_os)
+# Export with_rm to Makefile.am
+AC_SUBST(with_rm)
 
-# Export with_os to subconfigure.m4
-export with_os
+# Export with_rm to subconfigure.m4
+export with_rm
+
+# Add hwloc to RPATH because -lhwloc is inherited from parent configure.ac
+PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_hwloc}/lib],[LDFLAGS])
 
 # Find a C compiler.
 PAC_PROG_CC
@@ -160,11 +163,6 @@ AC_SUBST(master_top_srcdir)
 export master_top_builddir
 export master_top_srcdir
 
-# export prefix to Makefile.am
-PROGNAME=uti_test
-AC_SUBST(PROGNAME)
-
-
 # Set up default optimization level of compiler
 UTI_DEFAULT_COPTS="-O2"
 
@@ -175,6 +173,7 @@ for option in $enable_fast ; do
     case "$option" in
          defopt)
          enable_default_optimize=yes
+    	 UTI_DEFAULT_COPTS="-O0"
 	 ;;
     	 O*)
          enable_default_optimize=yes
@@ -285,25 +284,9 @@ AC_C_INLINE
 # update the cache first with the results of the previous configure steps
 PAC_CREATE_BASE_CACHE
 
-# now configure any actual recursively configures subsystems
-#for subsys in 
-
-# Get the value of libtool_static_flag
-if test ! -z "$UTI_LIBTOOL_STATIC_FLAG" ; then
-    uti_libtool_static_flag="$UTI_LIBTOOL_STATIC_FLAG"
-else
-    uti_libtool_static_flag="-static"
-fi
-AC_SUBST([mpich_libtool_static_flag])
-
-# export prefix to Makefile.am
-AC_SUBST(prefix)
-
-# UTI_SRCDIR gives the test/mpi configure the location of the source
-# files for an UTI implementation
-if test -n "$ac_abs_srcdir" ; then
-    MPI_SRCDIR=$ac_abs_srcdir
-fi
+# export uti_{src,build}dir to Makefile.am
+AC_SUBST(uti_srcdir)
+AC_SUBST(uti_builddir)
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h stdlib.h string.h unistd.h])
@@ -316,10 +299,6 @@ dnl date. we can use this to avoid rebuilding the library when
 dnl a build aborts due to an error (this is intended to help developers)
 AC_OUTPUT_COMMANDS([if [ ! -d lib ] ;  then mkdir lib; fi
 date > lib/newconfig])
-
-# add the LDFLAGS/LIBS we got so far to WRAPPERs
-WRAPPER_LDFLAGS="$WRAPPER_LDFLAGS $LDFLAGS"
-WRAPPER_LIBS="$WRAPPER_LIBS $LIBS"
 
 #################################################################################
 # cause libtool script to be built now so that we can use it to test one last

@@ -9,6 +9,7 @@
  *      Copyright (C) 2017 Hitachi, Ltd.
  */
 
+#define _GNU_SOURCE             /* See feature_test_macros(7) */
 #include <stdlib.h>
 #include <stdio.h>
 #include <strings.h>
@@ -20,68 +21,140 @@
 #include <sys/resource.h>
 #include <sys/capability.h>
 #include <hwloc.h>
+#include <hwloc/glibc-sched.h>
+#include <hwloc/openfabrics-verbs.h>
+#include <math.h>
 #include "uti.h"
 #include "uti_impl.h"
 
+int max_cpu_os_index = -1;
 int *nthr_per_pu;
 
+/* TODO: Construct this list at run-time by using ibv_get_device_name() */
+struct uti_fabric uti_fabrics[] = {
+	{ .name = "mlx5_0" },
+	{ .name = "hfi1_0" },
+	{ .name = NULL }
+};
+
 static hwloc_topology_t topo;
+
 
 #define BITS_PER_ENTRY (sizeof(uint64_t) * 8)
 #define NODE_ISSET(i, bitmap) !!((bitmap[i / BITS_PER_ENTRY] >> (i % BITS_PER_ENTRY)) & 1)
 
+
+#define SIZE_REMAINING(start, cur, max) (max - (cur - start))
+#define BITSOF_PRINT_UNIT (32)
+
+static void glibc_sched_setaffinity_snprintf(char *buf, size_t size, cpu_set_t *schedset)
+{
+	int i, j, k, nwords;
+	uint32_t word = 0;
+	char *cur = buf;
+	int rem = (max_cpu_os_index + 1) % BITSOF_PRINT_UNIT;
+
+	for (nwords = 0, i = max_cpu_os_index; i >= 0; nwords++) {
+		for (j = 0, word = 0;
+		     j < ((nwords == 0 && rem != 0) ? rem : BITSOF_PRINT_UNIT);
+		     j++, i--) {
+
+			if (CPU_ISSET(i, schedset)) {
+				word |= 1ULL << (i % BITSOF_PRINT_UNIT);
+			}
+		}
+		if (nwords > 0) {
+			cur += snprintf(cur, SIZE_REMAINING(buf, cur, size), " ");
+		}
+		
+		if (nwords == 0 && rem != 0) {
+			for (k = ceil(rem / 4.0) - 1; k >= 0; k--) {
+				cur += snprintf(cur, SIZE_REMAINING(buf, cur, size), "%1x", word >> (k * 4) & 0xf);
+			}
+		} else {
+			cur += snprintf(cur, SIZE_REMAINING(buf, cur, size), "%08x", word);
+		}
+	}
+}
+
+/* 1 character per 4 bits, 1 space per 32 bits, ..., \0 at the end */
+#define MAX_SCHEDSET_STR \
+(ceil((max_cpu_os_index + 1) / 4.0) +\
+ (max_cpu_os_index + 1) / 32 +\
+ 1)
+#define schedset_alloc() ((char *)malloc(MAX_SCHEDSET_STR))
+
+static void schedset_snprintf(char *dst, size_t size, cpu_set_t *schedset)
+{
+	//pr_debug("%s: info: MAX_SCHEDSET_STR: %f\n", __func__, MAX_SCHEDSET_STR);
+	glibc_sched_setaffinity_snprintf(dst, size, schedset);
+}
+
+static void pr_schedset(char *msg, cpu_set_t *schedset)
+{
+	char *buf;
+	if (!(buf = schedset_alloc())) {
+		pr_err("pr_debug_cpuset: error: allocating buf\n");
+	} else {
+		schedset_snprintf(buf, MAX_SCHEDSET_STR, schedset);
+		pr_debug("%s: %s\n", msg, buf);
+	}
+	free(buf);
+}
+
+static void cpuset_snprintf(char *dst, size_t size, hwloc_cpuset_t cpuset)
+{
+		cpu_set_t schedset;
+		hwloc_cpuset_to_glibc_sched_affinity(topo, cpuset, &schedset, sizeof(schedset));
+		schedset_snprintf(dst, size, &schedset);
+}
+
+static void pr_cpuset(char *msg, hwloc_cpuset_t cpuset)
+{
+	char *buf;
+	if (!(buf = schedset_alloc())) {
+		pr_err("pr_debug_cpuset: error: allocating buf\n");
+	} else {
+		cpuset_snprintf(buf, MAX_SCHEDSET_STR, cpuset);
+		pr_debug("%s: %s\n", msg, buf);
+	}
+	free(buf);
+}
+
 static int find_next_one(int i, uint64_t *bitmap) {
-	while (i < UTI_MAX_NUMA_DOMAINS && !NODE_ISSET(i, bitmap)) {
-		i++;
+	int j;
+	for (j = i + 1; j < UTI_MAX_NUMA_DOMAINS && !NODE_ISSET(j, bitmap); j++) {
 	}
-	return i;
+	return j;
 }
 
-#define for_each_node(i, bitmap) for (i = 0; i < UTI_MAX_NUMA_DOMAINS; i = find_next_one(i, bitmap))
+#define for_each_node(i, bitmap) for (i = find_next_one(-1, bitmap); i < UTI_MAX_NUMA_DOMAINS; i = find_next_one(i, bitmap))
 
-int uti_attr_init(uti_attr_t *attr)
+
+hwloc_obj_t get_cache_obj_by_pu(hwloc_obj_type_t type, hwloc_obj_t cpu)
 {
-	memset(attr, 0, sizeof(uti_attr_t));
-	return 0;
-}
-
-int uti_attr_destroy(uti_attr_t *attr)
-{
-	return 0;
-}
-
-__attribute__((constructor)) void uti_init(void)
-{
-	int ret;
-
-	/* Discover topology */
-	if ((ret = hwloc_topology_init(&topo))) {
-		pr_err("%s: error: hwloc_topology_init\n",
-			__func__);
-		return;
+	hwloc_obj_t obj = NULL;
+	while ((obj = hwloc_get_next_obj_by_type(topo, type, obj))) {
+		//pr_cpuset("get_cache_obj_by_pu", obj->cpuset);
+		if (hwloc_bitmap_isset(obj->cpuset, cpu->os_index)) {
+			break;
+		}
 	}
-
-	if ((ret = hwloc_topology_load(topo))) {
-		pr_err("%s: error: hwloc_topology_load\n",
-			__func__);
-		return;
-	}
-
-	nthr_per_pu = (unsigned int *)calloc(hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_PU), sizeof(unsigned int));
-
-	if (!nthr_per_pu) {
-		pr_err("%s: error: allocating nthr_per_pu\n",
-		       __func__);
-		return;
-	}
+	return obj;
 }
 
-__attribute__((destructor)) void uti_finalize()
+hwloc_obj_t get_numanode_obj_by_pu(hwloc_obj_t cpu)
 {
-	hwloc_topology_destroy(topo);
+	hwloc_obj_t obj = NULL;
+	while ((obj = hwloc_get_next_obj_by_type(topo, HWLOC_OBJ_NUMANODE, obj))) {
+		if (hwloc_bitmap_isset(cpu->nodeset, obj->os_index)) {
+			break;
+		}
+	}
+	return obj;
 }
 
-static int uti_string_to_glibc_sched_affinity(char *_cpu_list, cpu_set_t *schedset)
+static int string_to_glibc_sched_affinity(char *_cpu_list, cpu_set_t *schedset)
 {
 	int ret = 0;
 	int i;
@@ -116,7 +189,7 @@ static int uti_string_to_glibc_sched_affinity(char *_cpu_list, cpu_set_t *scheds
 			start = atoi(token);
 			end = atoi(minus + 1);
 			for (i = start; i <= end; i++) {
-				pr_debug("%s: schedset[%d]=1\n", __func__, i);
+				//pr_debug("%s: schedset[%d]=1\n", __func__, i);
 				CPU_SET(i, schedset);
 			}
 		} else {
@@ -133,13 +206,74 @@ static int uti_string_to_glibc_sched_affinity(char *_cpu_list, cpu_set_t *scheds
 	return ret;
 }
 
+int uti_attr_init(uti_attr_t *attr)
+{
+	memset(attr, 0, sizeof(uti_attr_t));
+	return 0;
+}
+
+int uti_attr_destroy(uti_attr_t *attr)
+{
+	return 0;
+}
+
+__attribute__((constructor)) void uti_init(void)
+{
+	int ret;
+
+	/* Discover topology */
+	if ((ret = hwloc_topology_init(&topo))) {
+		pr_err("%s: error: hwloc_topology_init\n",
+			__func__);
+		return;
+	}
+
+	if ((ret = hwloc_topology_set_io_types_filter(topo, HWLOC_TYPE_FILTER_KEEP_ALL))) {
+		pr_err("%s: error: hwloc_topology_set_io_types_filter\n",
+			__func__);
+		return;
+	}
+
+	if ((ret = hwloc_topology_load(topo))) {
+		pr_err("%s: error: hwloc_topology_load\n",
+			__func__);
+		return;
+	}
+
+	pr_debug("%s: info: ncpus=%d\n",
+	       __func__, hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_PU));
+
+	hwloc_obj_t obj = NULL;
+	while ((obj = hwloc_get_next_obj_by_type(topo, HWLOC_OBJ_PU, obj))) {
+		if (max_cpu_os_index < (int)obj->os_index) {
+			max_cpu_os_index = obj->os_index;
+		}
+	}
+
+	pr_debug("%s: info: max_cpu_os_index=%d\n",
+	       __func__, max_cpu_os_index);
+
+	nthr_per_pu = (int *)calloc(hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_PU), sizeof(int));
+
+	if (!nthr_per_pu) {
+		pr_err("%s: error: allocating nthr_per_pu\n",
+		       __func__);
+		return;
+	}
+}
+
+__attribute__((destructor)) void uti_finalize()
+{
+	hwloc_topology_destroy(topo);
+}
+
 static int uti_rr_allocate_cpu(hwloc_cpuset_t cpuset)
 {
 	int i;
 	int mincpu;
 	unsigned int minrr;
-	unsigned int newval;
-	unsigned int oldval;
+	int newval;
+	int oldval;
 
 retry:
 	minrr = (unsigned int)-1;
@@ -165,30 +299,28 @@ static int uti_set_pthread_attr(pthread_attr_t *pthread_attr, uti_attr_t* uti_at
 {
 	int ret;
 	int i;
-	int parent_cpu_os_index;
-	hwloc_obj_t parent_cpu, parent_numanode, parent_l1, parent_l2, parent_l3;
-	hwloc_cpuset_t cpuset, tmpset;
-	char *envset_str;
+	int caller_cpu_os_index;
+	hwloc_obj_t caller_cpu;
+	hwloc_cpuset_t cpuset, tmpset, env_cpuset;
+	char *env_schedset_str;
 	cap_t cap = NULL;
 
-	/* Find subgroups to which the caller belongs */
-	parent_cpu_os_index = sched_getcpu();
-	parent_cpu = hwloc_get_pu_obj_by_os_index(topo, parent_cpu_os_index);
+	/* Find caller cpu for later resolution of subgroups */
+	caller_cpu_os_index = sched_getcpu();
+	caller_cpu = hwloc_get_pu_obj_by_os_index(topo, caller_cpu_os_index);
+	if (caller_cpu) {
+		pr_debug("caller_cpu os_index=%d,logical_index=%d\n",
+				 caller_cpu->os_index, caller_cpu->logical_index);
+	}
 
-	if (!parent_cpu) {
+	if (!caller_cpu) {
                 pr_err("%s: error: cpu with os_index of %d not found\n",
-			__func__, parent_cpu_os_index);
+			__func__, caller_cpu_os_index);
 		ret = -ENOENT;
                 goto out;
 	}
 
-	parent_numanode = hwloc_get_ancestor_obj_by_type(topo, HWLOC_OBJ_NUMANODE, parent_cpu);
-	parent_l1 = hwloc_get_ancestor_obj_by_type(topo, HWLOC_OBJ_L1CACHE, parent_cpu);
-	parent_l2 = hwloc_get_ancestor_obj_by_type(topo, HWLOC_OBJ_L2CACHE, parent_cpu);
-	parent_l3 = hwloc_get_ancestor_obj_by_type(topo, HWLOC_OBJ_L3CACHE, parent_cpu);
-	pr_debug("parent_numanode->os_index=%d\n", parent_numanode->os_index);
-
-	/* Set initial cpuset to allowed & UTI_CPU_SET */
+	/* Initial cpuset */
 	cpuset = hwloc_bitmap_dup(hwloc_topology_get_allowed_cpuset(topo));
 
 	if (!(tmpset = hwloc_bitmap_alloc())) {
@@ -198,63 +330,161 @@ static int uti_set_pthread_attr(pthread_attr_t *pthread_attr, uti_attr_t* uti_at
 		goto out;
 	}
 
-	envset_str = getenv("UTI_CPU_SET");
-	if (envset_str) {
-		cpu_set_t envset;
-		CPU_ZERO(envset);
-		if (!(ret = uti_string_to_glibc_sched_affinity(envset_str, &envset))) {
-			hwloc_cpuset_from_glibc_sched_affinity(topo, tmpset, &envset);
-			hwloc_bitmap_and(cpuset, cpuset, tmpset);
-		} else {
-			pr_warn("%s: warning: uti_string_to_glibc_sched_affinity returned %d\n",
-				__func__, ret);
-		}
-	}
-
-	/* Narrow down cpuset */
+	/* NUMA_SET */
 	if (uti_attr->flags & UTI_FLAG_NUMA_SET) {
 		hwloc_bitmap_zero(tmpset);
 		for_each_node(i, uti_attr->numa_set) {
 			hwloc_obj_t numanode = hwloc_get_numanode_obj_by_os_index(topo, i);
-			hwloc_bitmap_or(tmpset, tmpset, numanode->cpuset);
+			pr_debug("%s: info: numa os_index: %d, logical_index: %d\n",
+					 __func__, i, numanode ? numanode->logical_index: -1);
+			if (numanode) {
+				pr_cpuset("numanode->cpuset", numanode->cpuset);
+				hwloc_bitmap_or(tmpset, tmpset, numanode->cpuset);
+			}
 		}
 		hwloc_bitmap_and(cpuset, cpuset, tmpset);
 	}
 
-	if (uti_attr->flags & UTI_FLAG_SAME_NUMA_DOMAIN) {
-		hwloc_bitmap_and(cpuset, cpuset, parent_numanode->cpuset);
+	
+	/* {SAME,DIFFERENT}_NUMA_DOMAIN */
+	if (uti_attr->flags &
+	    (UTI_FLAG_SAME_NUMA_DOMAIN | UTI_FLAG_DIFFERENT_NUMA_DOMAIN)) {
+		hwloc_obj_t caller_numanode =
+			get_numanode_obj_by_pu(caller_cpu);
+		pr_debug("%s: info: caller_numanode->os_index=%d\n", __func__, caller_numanode ? caller_numanode->os_index : -1);
+		
+		if (caller_numanode) {
+			if (uti_attr->flags & UTI_FLAG_SAME_NUMA_DOMAIN) {
+				hwloc_bitmap_and(cpuset, cpuset, caller_numanode->cpuset);
+			}
+			
+			if (uti_attr->flags & UTI_FLAG_DIFFERENT_NUMA_DOMAIN) {
+				hwloc_bitmap_andnot(cpuset, cpuset, caller_numanode->cpuset);
+			}
+		}
 	}
 
-	if (uti_attr->flags & UTI_FLAG_DIFFERENT_NUMA_DOMAIN) {
-		hwloc_bitmap_andnot(cpuset, cpuset, parent_numanode->cpuset);
+	/* {SAME,DIFFERENT}_L1 */
+	if (uti_attr->flags &
+	    (UTI_FLAG_SAME_L1 | UTI_FLAG_DIFFERENT_L1)) {
+		hwloc_obj_t l1 =
+			get_cache_obj_by_pu(HWLOC_OBJ_L1CACHE, caller_cpu);
+		
+		if (l1) {
+			pr_cpuset("l1->cpuset", l1->cpuset);
+
+			if (uti_attr->flags & UTI_FLAG_SAME_L1) {
+				hwloc_bitmap_and(cpuset, cpuset, l1->cpuset);
+			}
+			
+			if (uti_attr->flags & UTI_FLAG_DIFFERENT_L1) {
+				hwloc_bitmap_andnot(cpuset, cpuset, l1->cpuset);
+			}
+		} else {
+			pr_warn("%s: Caller L1 not found\n", __func__);
+		}
 	}
 
-	if (uti_attr->flags & UTI_FLAG_SAME_L1) {
-		hwloc_bitmap_and(cpuset, cpuset, parent_l1->cpuset);
+	/* {SAME,DIFFERENT}_L2 */
+	if (uti_attr->flags &
+	    (UTI_FLAG_SAME_L2 | UTI_FLAG_DIFFERENT_L2)) {
+		hwloc_obj_t l2 =
+			get_cache_obj_by_pu(HWLOC_OBJ_L2CACHE, caller_cpu);
+		
+		if (l2) {
+			pr_cpuset("l2->cpuset", l2->cpuset);
+
+			if ((uti_attr->flags & UTI_FLAG_SAME_L2) && l2) {
+				hwloc_bitmap_and(cpuset, cpuset, l2->cpuset);
+			}
+			
+			if ((uti_attr->flags & UTI_FLAG_DIFFERENT_L2) && l2) {
+				hwloc_bitmap_andnot(cpuset, cpuset, l2->cpuset);
+			}
+		} else {
+			pr_warn("%s: Caller L2 not found\n", __func__);
+		}
 	}
 
-	if (uti_attr->flags & UTI_FLAG_DIFFERENT_L1) {
-		hwloc_bitmap_andnot(cpuset, cpuset, parent_l1->cpuset);
+	/* {SAME,DIFFERENT}_L3 */
+	if (uti_attr->flags &
+	    (UTI_FLAG_SAME_L3 | UTI_FLAG_DIFFERENT_L3)) {
+		hwloc_obj_t l3 =
+			get_cache_obj_by_pu(HWLOC_OBJ_L3CACHE, caller_cpu);
+		
+		if (l3) {
+			pr_cpuset("l3->cpuset", l3->cpuset);
+
+			if ((uti_attr->flags & UTI_FLAG_SAME_L3) && l3) {
+				hwloc_bitmap_and(cpuset, cpuset, l3->cpuset);
+			}
+			
+			if ((uti_attr->flags & UTI_FLAG_DIFFERENT_L3) && l3) {
+				hwloc_bitmap_andnot(cpuset, cpuset, l3->cpuset);
+			}
+		} else {
+			pr_warn("%s: Caller L3 not found\n", __func__);
+		}
 	}
 
-	if ((uti_attr->flags & UTI_FLAG_SAME_L2) && parent_l2) {
-		hwloc_bitmap_and(cpuset, cpuset, parent_l2->cpuset);
+	/* UTI_CPU_SET, PREFER_FWK, PREFER_LWK */
+	if (!(env_cpuset = hwloc_bitmap_alloc())) {
+                pr_err("%s: error: allocating env_cpuset\n",
+			__func__);
+		ret = -ENOMEM;
+		goto out;
 	}
 
-	if ((uti_attr->flags & UTI_FLAG_DIFFERENT_L2) && parent_l2) {
-		hwloc_bitmap_andnot(cpuset, cpuset, parent_l2->cpuset);
+	env_schedset_str = getenv("UTI_CPU_SET");
+	if (env_schedset_str) {
+		cpu_set_t env_schedset;
+
+		CPU_ZERO(&env_schedset);
+		if (!(ret = string_to_glibc_sched_affinity(env_schedset_str, &env_schedset))) {
+			hwloc_cpuset_from_glibc_sched_affinity(topo, env_cpuset, &env_schedset, sizeof(cpu_set_t));
+
+		} else {
+			pr_warn("%s: warning: string_to_glibc_sched_affinity returned %d\n",
+				__func__, ret);
+		}
+	}
+	
+	if (!hwloc_bitmap_iszero(env_cpuset)) {
+		pr_cpuset("cpuset", cpuset);
+		pr_cpuset("env_cpuset", env_cpuset);
+		
+		if ((uti_attr->flags & UTI_FLAG_PREFER_LWK)) {
+			hwloc_bitmap_andnot(cpuset, cpuset, env_cpuset);
+		} else { /* Including PREFER_FWK and !PREFER_FWK */
+			hwloc_bitmap_and(cpuset, cpuset, env_cpuset);
+		}
 	}
 
-	if ((uti_attr->flags & UTI_FLAG_SAME_L3) && parent_l3) {
-		hwloc_bitmap_and(cpuset, cpuset, parent_l3->cpuset);
+	/* FABRIC_INTR_AFFINITY */
+	if (uti_attr->flags & UTI_FLAG_FABRIC_INTR_AFFINITY) {
+		struct uti_fabric *uti_fabric;
+
+		for (uti_fabric = uti_fabrics; uti_fabric->name; uti_fabric++) { 
+			hwloc_obj_t fabric, package;
+
+			pr_debug("uti_fabric->name: %s\n", uti_fabric->name);
+			fabric = hwloc_ibv_get_device_osdev_by_name(topo, uti_fabric->name);
+
+			/* Find non-I/O ancestor which have cpuset */
+			if (fabric) {
+				package = hwloc_get_non_io_ancestor_obj(topo, fabric);
+				if (package) {
+					pr_cpuset("package", package->cpuset);
+					hwloc_bitmap_and(cpuset, cpuset, package->cpuset);
+				}
+			}
+		}
 	}
 
-	if ((uti_attr->flags & UTI_FLAG_DIFFERENT_L3) && parent_l3) {
-		hwloc_bitmap_andnot(cpuset, cpuset, parent_l3->cpuset);
-	}
-
+	/* EXCLUSIVE_CPU, CPU_INTENSIVE */
 	if (uti_attr->flags &
 	    (UTI_FLAG_EXCLUSIVE_CPU | UTI_FLAG_CPU_INTENSIVE)) {
+		pr_cpuset("rr cpuset", cpuset);
 		hwloc_bitmap_only(cpuset, uti_rr_allocate_cpu(cpuset));
 	}
 
@@ -262,8 +492,11 @@ static int uti_set_pthread_attr(pthread_attr_t *pthread_attr, uti_attr_t* uti_at
 	ret = hwloc_bitmap_weight(cpuset);
 	if (ret > 0) {
 		cpu_set_t schedset;
+
 		hwloc_cpuset_to_glibc_sched_affinity(topo, cpuset, &schedset, sizeof(schedset));
-		if ((ret = pthread_setaffinity_np(pthread_attr, sizeof(cpu_set_t), &schedset))) {
+		pr_schedset("final schedset", &schedset);
+
+		if ((ret = pthread_attr_setaffinity_np(pthread_attr, sizeof(cpu_set_t), &schedset))) {
 			pr_err("%s: error: pthread_setaffinity_np\n",
 				__func__);
 			goto out;
@@ -272,7 +505,7 @@ static int uti_set_pthread_attr(pthread_attr_t *pthread_attr, uti_attr_t* uti_at
 		pr_warn("%s: warning: cpuset is empty\n", __func__);
 	}
 
-	/* Use real-time scheduler */
+	/* Assign real-time scheduler */
 	if (uti_attr->flags & UTI_FLAG_HIGH_PRIORITY) {
 		struct rlimit rlimit;
 		cap_flag_value_t cap_flag_value;
@@ -296,7 +529,7 @@ static int uti_set_pthread_attr(pthread_attr_t *pthread_attr, uti_attr_t* uti_at
 			goto out;
 		}
 
-		/* Process needs CAP_SYS_NICE or positive RLIMIT_RTPRIO */
+		/* Process needs CAP_SYS_NICE or positive RLIMIT_RTPRIO to use it */
 		if (cap_flag_value == CAP_SET || rlimit.rlim_cur > 0) {
 			struct sched_param param = { .sched_priority = 99 };
 
@@ -328,20 +561,41 @@ out:
 	cap_free(cap);
 	hwloc_bitmap_free(cpuset);
 	hwloc_bitmap_free(tmpset);
+	hwloc_bitmap_free(env_cpuset);
 	return ret;
 }
 
-int uti_pthread_create(pthread_t *thread, pthread_attr_t *pthread_attr,
+int uti_pthread_create(pthread_t *thread, pthread_attr_t *_pthread_attr,
                        void *(*start_routine) (void *), void *arg, uti_attr_t *uti_attr)
 {
 	int ret;
 	char *disable_uti_str;
 	int disable_uti;
+	pthread_attr_t *pthread_attr;
+	pthread_attr_t *tmp_attr = NULL;
 	
 	disable_uti_str = getenv("DISABLE_UTI");
 	disable_uti = disable_uti_str ? atoi(disable_uti_str) : 0;
 
-	if (!disable_uti) {
+	if (!uti_attr) {
+		pr_debug("%s: info: uti_attr is NULL\n",
+			 __func__);
+	}
+
+	if (!disable_uti && uti_attr) {
+		if (!_pthread_attr) {
+			if (!(tmp_attr = malloc(sizeof(pthread_attr_t)))) {
+				pr_err("%s: error: allocating tmp_attr\n",
+				       __func__);
+				ret = ENOMEM;
+				goto out;
+			}
+			pthread_attr_init(tmp_attr);
+			pthread_attr = tmp_attr;
+		} else {
+			pthread_attr = _pthread_attr;
+		}
+
 		if ((ret = uti_set_pthread_attr(pthread_attr, uti_attr))) {
 			pr_err("%s: error: uti_set_pthread_attr\n",
 			       __func__);
@@ -353,6 +607,11 @@ int uti_pthread_create(pthread_t *thread, pthread_attr_t *pthread_attr,
 		pr_err("%s: error: pthread_create: %s\n",
 		       __func__, strerror(ret));
 		goto out;
+	}
+
+	if (tmp_attr) {
+		pthread_attr_destroy(tmp_attr);
+		free(tmp_attr);
 	}
 
 	ret = 0;

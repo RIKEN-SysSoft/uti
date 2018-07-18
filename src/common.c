@@ -1,7 +1,7 @@
 #include "uti.h"
 #include "uti_impl.h"
 
-int loglevel = UTI_LOGLEVEL_ERR;
+int loglevel = UTI_LOGLEVEL_DEBUG;
 
 /*
  * Messages with level below or equal to loglevel
