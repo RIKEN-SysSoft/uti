@@ -97,7 +97,7 @@ bin_PROGRAMS =
 @BUILD_LINUX_TRUE@	-I$(top_srcdir)/src/linux/include
 
 @BUILD_LINUX_TRUE@am__append_2 = \
-@BUILD_LINUX_TRUE@	-Wl,-rpath -Wl,$(with_hwloc)/lib -lhwloc -lcap
+@BUILD_LINUX_TRUE@	-Wl,-rpath -Wl,$(with_hwloc)/lib -lhwloc -lcap -lrt
 
 @BUILD_LINUX_TRUE@am__append_3 = \
 @BUILD_LINUX_TRUE@	src/linux/uti.c

@@ -30,8 +30,6 @@ struct uti_fabric {
 
 extern struct uti_fabric uti_fabrics[];
 
-extern int max_cpu_os_index;
-extern int *nthr_per_pu; /* #threads per PU, indexed by hwloc_obj::logical_index */
 extern cpu_set_t cpu_active_mask;
 extern int loglevel;
 

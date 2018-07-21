@@ -12,23 +12,33 @@
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <strings.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <sched.h>
 #include <pthread.h>
+#include <math.h>
+#include <fcntl.h>           /* For O_* constants */
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/capability.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 #include <hwloc.h>
 #include <hwloc/glibc-sched.h>
 #include <hwloc/openfabrics-verbs.h>
-#include <math.h>
 #include "uti.h"
 #include "uti_impl.h"
 
-int max_cpu_os_index = -1;
-int *nthr_per_pu;
+static hwloc_topology_t topo;
+static int max_cpu_os_index = -1;
+
+static int shm_fd;
+static char shm_fn[] = "/uti";
+static int shm_leader;
+static int *nthr_per_pu; /* #threads histogram indexed by hwloc_obj::os_index */
 
 /* TODO: Construct this list at run-time by using ibv_get_device_name() */
 struct uti_fabric uti_fabrics[] = {
@@ -36,8 +46,6 @@ struct uti_fabric uti_fabrics[] = {
 	{ .name = "hfi1_0" },
 	{ .name = NULL }
 };
-
-static hwloc_topology_t topo;
 
 
 #define BITS_PER_ENTRY (sizeof(uint64_t) * 8)
@@ -193,8 +201,7 @@ static int string_to_glibc_sched_affinity(char *_cpu_list, cpu_set_t *schedset)
 				CPU_SET(i, schedset);
 			}
 		} else {
-			pr_debug("%s: schedset[%d]=1\n",
-				__func__, atoi(token));
+			//pr_debug("%s: schedset[%d]=1\n", __func__, atoi(token));
 			CPU_SET(atoi(token), schedset);
 		}
 		token = strsep(&cpu_list, ",");
@@ -220,6 +227,9 @@ int uti_attr_destroy(uti_attr_t *attr)
 __attribute__((constructor)) void uti_init(void)
 {
 	int ret;
+	hwloc_obj_t obj = NULL;
+	size_t shm_sz;
+	struct stat shm_stat;
 
 	/* Discover topology */
 	if ((ret = hwloc_topology_init(&topo))) {
@@ -240,31 +250,67 @@ __attribute__((constructor)) void uti_init(void)
 		return;
 	}
 
-	pr_debug("%s: info: ncpus=%d\n",
-	       __func__, hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_PU));
+	//pr_debug("%s: info: ncpus=%d\n", __func__, hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_PU));
 
-	hwloc_obj_t obj = NULL;
 	while ((obj = hwloc_get_next_obj_by_type(topo, HWLOC_OBJ_PU, obj))) {
 		if (max_cpu_os_index < (int)obj->os_index) {
 			max_cpu_os_index = obj->os_index;
 		}
 	}
 
-	pr_debug("%s: info: max_cpu_os_index=%d\n",
-	       __func__, max_cpu_os_index);
+	//pr_debug("%s: info: max_cpu_os_index=%d\n", __func__, max_cpu_os_index);
 
-	nthr_per_pu = (int *)calloc(hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_PU), sizeof(int));
 
-	if (!nthr_per_pu) {
-		pr_err("%s: error: allocating nthr_per_pu\n",
-		       __func__);
-		return;
+	/* Establish shared nthr_per_pu array */
+	shm_sz = hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_PU) * sizeof(int);
+
+	if ((shm_fd = shm_open(shm_fn, O_EXCL | O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)) != -1) { /* Leader */
+		if ((ftruncate(shm_fd, shm_sz))) {
+			pr_err("%s: error: ftruncate: %s\n",
+			       __func__, strerror(errno));
+		}
+		shm_leader = 1;
+	} else { /* Follower */
+		if (errno != EEXIST) {
+			pr_err("%s: error: shm_open: %s\n",
+			       __func__, strerror(errno));
+			return;
+		}
+
+		if ((shm_fd = shm_open(shm_fn, O_RDWR, S_IRUSR | S_IWUSR)) == -1) {
+			pr_err("%s: error: shm_open: %s\n",
+			       __func__, strerror(errno));
+			return;
+		}
+		
+		/* Wait until the file becomes ready */
+		while ((ret = fstat(shm_fd, &shm_stat)) != -1 &&
+		       shm_stat.st_size != shm_sz) {
+		}
+		
+		if (ret == -1) {
+			pr_err("%s: error: fstat: %s\n",
+			       __func__, strerror(errno));
+			return;
+		}
+	}
+
+	if ((nthr_per_pu = mmap(0, shm_sz, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0)) == MAP_FAILED) {
+		pr_err("%s: error: mapping nthr_per_pu: %s\n",
+		       __func__, strerror(errno));
 	}
 }
 
 __attribute__((destructor)) void uti_finalize()
 {
 	hwloc_topology_destroy(topo);
+
+#if 0
+	if (shm_leader && shm_unlink(shm_fn)) {
+		pr_err("%s: error: shm_unlink: %s\n",
+		       __func__, strerror(errno));
+	}
+#endif
 }
 
 static int uti_rr_allocate_cpu(hwloc_cpuset_t cpuset)
@@ -576,6 +622,11 @@ int uti_pthread_create(pthread_t *thread, pthread_attr_t *_pthread_attr,
 	
 	disable_uti_str = getenv("DISABLE_UTI");
 	disable_uti = disable_uti_str ? atoi(disable_uti_str) : 0;
+
+	if (disable_uti) {
+		pr_debug("%s: info: uti is disabled\n",
+			 __func__);
+	}
 
 	if (!uti_attr) {
 		pr_debug("%s: info: uti_attr is NULL\n",
