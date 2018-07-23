@@ -179,7 +179,7 @@ static int string_to_glibc_sched_affinity(char *_cpu_list, cpu_set_t *schedset)
 	token = strsep(&cpu_list, ",");
 	while (token) {
 		if (*token == 0) {
-			pr_err("%s: error: illegal expression: %s\n",
+			pr_err("%s: error: expecting number before comma: %s\n",
 				__func__, _cpu_list); /* empty token */
 			ret = -EINVAL;
 			goto out;
@@ -188,7 +188,7 @@ static int string_to_glibc_sched_affinity(char *_cpu_list, cpu_set_t *schedset)
 			int start, end;
 
 			if (*(minus + 1) == 0) {
-				pr_err("%s: error: illegal expression: %s\n",
+				pr_err("%s: error: expecting number before minus: %s\n",
 					__func__, _cpu_list); /* empty token */
 				ret = -EINVAL;
 				goto out;
@@ -612,7 +612,8 @@ out:
 }
 
 int uti_pthread_create(pthread_t *thread, pthread_attr_t *_pthread_attr,
-                       void *(*start_routine) (void *), void *arg, uti_attr_t *uti_attr)
+                       void *(*start_routine) (void *), void *arg,
+		       uti_attr_t *uti_attr)
 {
 	int ret;
 	char *disable_uti_str;
@@ -624,7 +625,7 @@ int uti_pthread_create(pthread_t *thread, pthread_attr_t *_pthread_attr,
 	disable_uti = disable_uti_str ? atoi(disable_uti_str) : 0;
 
 	if (disable_uti) {
-		pr_debug("%s: info: uti is disabled\n",
+		pr_warn("%s: warning: uti is disabled\n",
 			 __func__);
 	}
 
@@ -633,7 +634,9 @@ int uti_pthread_create(pthread_t *thread, pthread_attr_t *_pthread_attr,
 			 __func__);
 	}
 
-	if (!disable_uti && uti_attr) {
+	if (disable_uti) {
+		pthread_attr = _pthread_attr;
+	} else if (uti_attr) {
 		if (!_pthread_attr) {
 			if (!(tmp_attr = malloc(sizeof(pthread_attr_t)))) {
 				pr_err("%s: error: allocating tmp_attr\n",

@@ -1,5 +1,5 @@
 /**
- * \file uti.h.in
+ * \file uti.h
  *  License details are found in the file LICENSE.
  * \brief
  *  UTI API
@@ -7,11 +7,31 @@
  *      Copyright (C) 2016-2017 RIKEN AICS
  */
 
+#ifndef _UTI_H_INCLUDED_
+#define _UTI_H_INCLUDED_
+
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
+
+/* Log */
+
+enum uti_loglevel {
+	UTI_LOGLEVEL_ERR = 0,
+	UTI_LOGLEVEL_WARN,
+	UTI_LOGLEVEL_DEBUG
+};
+
+extern enum uti_loglevel uti_loglevel;
+static inline void uti_set_loglevel(enum uti_loglevel level)
+{
+	uti_loglevel = level;
+}
+
+
+/* Attribute: Types */
 
 #define UTI_FLAG_NUMA_SET (1ULL << 1) /* Indicates NUMA_SET is specified */
 
@@ -35,8 +55,7 @@
 #define UTI_FLAG_PREFER_FWK (1ULL << 15)
 #define UTI_FLAG_FABRIC_INTR_AFFINITY (1ULL << 16)
 
-/* Linux default value is used */
-#define UTI_MAX_NUMA_DOMAINS (1024)
+#define UTI_MAX_NUMA_DOMAINS (1024) /* Taken from Linux default value */
 
 typedef struct uti_attr {
     /* UTI_CPU_SET environmental variable is used to denote the preferred location of utility thread */
@@ -44,13 +63,8 @@ typedef struct uti_attr {
     uint64_t flags; /* Representing location and behavior hints by bitmap */
 } uti_attr_t;
 
-enum UTI_LOGLEVEL {
-	UTI_LOGLEVEL_ERR = 0,
-	UTI_LOGLEVEL_WARN,
-	UTI_LOGLEVEL_DEBUG
-};
 
-extern int loglevel;
+/* Attribute: Functions */
 
 int uti_attr_init(uti_attr_t *attr);
 int uti_attr_destroy(uti_attr_t *attr);
@@ -217,8 +231,9 @@ static inline int UTI_ATTR_FABRIC_INTR_AFFINITY(uti_attr_t *uti_attr)
 	return 0;
 }
 
-int uti_pthread_create(pthread_t *thread, pthread_attr_t * attr,
+int uti_pthread_create(pthread_t *thread, pthread_attr_t *attr,
                        void *(*start_routine) (void *), void * arg,
                        uti_attr_t *uti_attr);
 
-int uti_set_loglevel(enum UTI_LOGLEVEL level);
+
+#endif /* _UTI_H_INCLUDED_ */

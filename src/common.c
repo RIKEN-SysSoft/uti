@@ -1,14 +1,6 @@
 #include "uti.h"
 #include "uti_impl.h"
 
-int loglevel = UTI_LOGLEVEL_DEBUG;
+/* Log */
 
-/*
- * Messages with level below or equal to loglevel
- * are printed out
- */
-int uti_set_loglevel(enum UTI_LOGLEVEL level)
-{
-	loglevel = level;
-	return 0;
-}
+enum uti_loglevel uti_loglevel = UTI_LOGLEVEL_DEBUG;
