@@ -37,11 +37,11 @@ lib_LTLIBRARIES = lib/lib@UTILIBNAME@.la
 lib_lib@UTILIBNAME@_la_LIBADD = $(external_libs)
 lib_lib@UTILIBNAME@_la_LDFLAGS = $(external_ldflags) $(ABIVERSIONFLAGS)
 
-# Specify directories to build
+# Let "make" recurse in the following directories
 SUBDIRS = . test
 
-# Specify directories to distribute
-DIST_SUBDIRS = .
+# Let "make distclean" recurse in the following directories
+DIST_SUBDIRS = . test
 
 # Specify files to distribute but not covered automatically
 EXTRA_DIST = README LICENSE RELEASE CONTRIBUTORS

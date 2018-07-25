@@ -410,7 +410,7 @@ AS_IF([test -z "$with_hwloc"],
 	[AC_MSG_ERROR([Specify --with-hwloc=<path>])])
 AC_SUBST(with_hwloc)
 
-# Configure test/
+# Let "configure" recurse in test
 AC_CONFIG_SUBDIRS([test])
 
 #################################################################################
