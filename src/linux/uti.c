@@ -305,12 +305,10 @@ __attribute__((destructor)) void uti_finalize()
 {
 	hwloc_topology_destroy(topo);
 
-#if 0
 	if (shm_leader && shm_unlink(shm_fn)) {
 		pr_err("%s: error: shm_unlink: %s\n",
 		       __func__, strerror(errno));
 	}
-#endif
 }
 
 static int uti_rr_allocate_cpu(hwloc_cpuset_t cpuset)
