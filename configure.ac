@@ -410,6 +410,19 @@ AS_IF([test -z "$with_hwloc"],
 	[AC_MSG_ERROR([Specify --with-hwloc=<path>])])
 AC_SUBST(with_hwloc)
 
+# Check version of hwloc
+hwloc_pkgconfig_dir=`find $with_hwloc/lib $with_hwloc/lib64 -name pkgconfig 2> /dev/null | tr '\n' ':' | sed 's/:$//'`
+AC_MSG_NOTICE([hwloc_pkgconfig_dir=$hwloc_pkgconfig_dir])
+
+AS_IF([test -z "$hwloc_pkgconfig_dir"],
+	[AC_MSG_ERROR([hwloc.pc not found])])
+
+hwloc_version=`PKG_CONFIG_PATH=$hwloc_pkgconfig_dir pkg-config --modversion hwloc | cut -d'.' -f 1-2`
+AC_MSG_NOTICE([hwloc_version=$hwloc_version])
+
+AS_IF([test "x`echo $hwloc_version \>= 2.0 | bc -l`" == x0],
+	[AC_MSG_ERROR([Use hwloc-2.0 or later])])
+
 # Let "configure" recurse in test
 AC_CONFIG_SUBDIRS([test])
 

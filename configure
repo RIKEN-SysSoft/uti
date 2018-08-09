@@ -15104,7 +15104,24 @@ if test -z "$with_hwloc"; then :
 fi
 
 
-# Configure test/
+# Check version of hwloc
+hwloc_pkgconfig_dir=`find $with_hwloc/lib $with_hwloc/lib64 -name pkgconfig 2> /dev/null | tr '\n' ':' | sed 's/:$//'`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: hwloc_pkgconfig_dir=$hwloc_pkgconfig_dir" >&5
+$as_echo "$as_me: hwloc_pkgconfig_dir=$hwloc_pkgconfig_dir" >&6;}
+
+if test -z "$hwloc_pkgconfig_dir"; then :
+  as_fn_error $? "hwloc.pc not found" "$LINENO" 5
+fi
+
+hwloc_version=`PKG_CONFIG_PATH=$hwloc_pkgconfig_dir pkg-config --modversion hwloc | cut -d'.' -f 1-2`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: hwloc_version=$hwloc_version" >&5
+$as_echo "$as_me: hwloc_version=$hwloc_version" >&6;}
+
+if test "x`echo $hwloc_version \>= 2.0 | bc -l`" == x0; then :
+  as_fn_error $? "Use hwloc-2.0 or later" "$LINENO" 5
+fi
+
+# Let "configure" recurse in test
 
 
 subdirs="$subdirs test"
