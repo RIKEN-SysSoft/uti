@@ -233,6 +233,7 @@ __attribute__((constructor)) void uti_init(void)
 	size_t shm_sz;
 	struct stat shm_stat;
 	int retry;
+	unsigned int hwloc_api_version;
 
 	/* Discover topology */
 	if ((ret = hwloc_topology_init(&topo))) {
@@ -249,6 +250,19 @@ __attribute__((constructor)) void uti_init(void)
 
 	if ((ret = hwloc_topology_load(topo))) {
 		pr_err("%s: error: hwloc_topology_load\n",
+			__func__);
+		return;
+	}
+
+	hwloc_api_version = hwloc_get_api_version();
+	if (hwloc_api_version < 0x00020000) {
+		pr_err("%s: error: hwloc_api_version (%x) is lower than expected. hwloc symbols might be resolved with unexpected object (e.g. MVAPICH).\n",
+		       __func__, hwloc_api_version);
+		return;
+	}
+	
+	if ((ret = hwloc_topology_abi_check(topo))) {
+		pr_err("%s: error: hwloc_topology_abi_check: hwloc symbols might be resolved with unexpected object (e.g. MVAPICH).\n",
 			__func__);
 		return;
 	}
