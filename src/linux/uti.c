@@ -32,6 +32,8 @@
 #include "uti.h"
 #include "uti_impl.h"
 
+#define N_SHM_RETRY 10000 /* 10 sec */
+
 static hwloc_topology_t topo;
 static int max_cpu_os_index = -1;
 
@@ -230,6 +232,7 @@ __attribute__((constructor)) void uti_init(void)
 	hwloc_obj_t obj = NULL;
 	size_t shm_sz;
 	struct stat shm_stat;
+	int retry;
 
 	/* Discover topology */
 	if ((ret = hwloc_topology_init(&topo))) {
@@ -284,8 +287,17 @@ __attribute__((constructor)) void uti_init(void)
 		}
 		
 		/* Wait until the file becomes ready */
+		retry = 0;
 		while ((ret = fstat(shm_fd, &shm_stat)) != -1 &&
 		       shm_stat.st_size != shm_sz) {
+			retry++;
+			if (retry > N_SHM_RETRY) {
+				shm_unlink(shm_fn);
+				pr_err("%s: error: wait on /dev/shm%s timed out\n",
+				       shm_fn, __func__);
+				return;
+			}
+			usleep(1000);
 		}
 		
 		if (ret == -1) {
