@@ -345,7 +345,7 @@ static int uti_set_pthread_attr(pthread_attr_t *pthread_attr, uti_attr_t* uti_at
 	int i;
 	int caller_cpu_os_index;
 	hwloc_obj_t caller_cpu;
-	hwloc_cpuset_t cpuset, tmpset, env_cpuset;
+	hwloc_cpuset_t cpuset = NULL, tmpset = NULL, env_cpuset = NULL;
 	char *env_schedset_str;
 	cap_t cap = NULL;
 
@@ -603,9 +603,12 @@ static int uti_set_pthread_attr(pthread_attr_t *pthread_attr, uti_attr_t* uti_at
 	ret = 0;
 out:
 	cap_free(cap);
-	hwloc_bitmap_free(cpuset);
-	hwloc_bitmap_free(tmpset);
-	hwloc_bitmap_free(env_cpuset);
+	if (cpuset)
+		hwloc_bitmap_free(cpuset);
+	if (tmpset)
+		hwloc_bitmap_free(tmpset);
+	if (env_cpuset)
+		hwloc_bitmap_free(env_cpuset);
 	return ret;
 }
 
@@ -661,12 +664,12 @@ int uti_pthread_create(pthread_t *thread, pthread_attr_t *_pthread_attr,
 		goto out;
 	}
 
+	ret = 0;
+out:
 	if (tmp_attr) {
 		pthread_attr_destroy(tmp_attr);
 		free(tmp_attr);
 	}
 
-	ret = 0;
-out:
 	return ret;
 }
