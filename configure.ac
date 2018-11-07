@@ -30,13 +30,6 @@ if test -z "$UTI_VERSION" ; then
    AC_MSG_ERROR([UTI_VERSION is empty, check maint/version.m4 for errors])
 fi
 
-# ABIvERSION is the name used by simplemake, so we reassign the
-# liblcc_so_version number to it
-ABIVERSION=${liblcc_so_version}
-export ABIVERSION
-export liblcc_so_version
-AC_SUBST(ABIVERSION)
-
 # print out the configure options
 CONFIGURE_ARGUMENTS="$ac_configure_args"
 AC_SUBST(CONFIGURE_ARGUMENTS)
