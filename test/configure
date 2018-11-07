@@ -2535,8 +2535,8 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 CFLAGS="$CFLAGS $UTITEST_CFLAGS"
-CPPFLAGS="$CPPFLAGS $UTITEST_CPPFLAGS"
-LDFLAGS="$LDFLAGS $UTITEST_LDFLAGS"
+CPPFLAGS="$CPPFLAGS $UTITEST_CPPFLAGS -I${prefix}/include"
+LDFLAGS="$LDFLAGS $UTITEST_LDFLAGS -L${prefix}/lib"
 LIBS="$LIBS $UTITEST_LIBS"
 
 # Check whether --enable-g was given.

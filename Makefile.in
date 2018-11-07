@@ -92,12 +92,13 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+target_triplet = @target@
 bin_PROGRAMS =
 @BUILD_LINUX_TRUE@am__append_1 = \
 @BUILD_LINUX_TRUE@	-I$(top_srcdir)/src/linux/include
 
 @BUILD_LINUX_TRUE@am__append_2 = \
-@BUILD_LINUX_TRUE@	-Wl,-rpath -Wl,$(with_hwloc)/lib -lhwloc -lcap -lrt
+@BUILD_LINUX_TRUE@	-lcap -lrt
 
 @BUILD_LINUX_TRUE@am__append_3 = \
 @BUILD_LINUX_TRUE@	src/linux/uti.c
@@ -127,6 +128,13 @@ am__aclocal_m4_deps = $(top_srcdir)/confdb/aclocal_bugfix.m4 \
 	$(top_srcdir)/maint/version.m4 \
 	$(top_srcdir)/src/linux/subconfigure.m4 \
 	$(top_srcdir)/src/mckernel/subconfigure.m4 \
+	$(top_srcdir)/contrib/hwloc/config/hwloc.m4 \
+	$(top_srcdir)/contrib/hwloc/config/hwloc_check_attributes.m4 \
+	$(top_srcdir)/contrib/hwloc/config/hwloc_check_visibility.m4 \
+	$(top_srcdir)/contrib/hwloc/config/hwloc_check_vendor.m4 \
+	$(top_srcdir)/contrib/hwloc/config/hwloc_components.m4 \
+	$(top_srcdir)/contrib/hwloc/config/hwloc_pkg.m4 \
+	$(top_srcdir)/contrib/hwloc/config/netloc.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -137,7 +145,9 @@ DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/src/include/config.h
+CONFIG_HEADER = $(top_builddir)/src/include/config.h \
+	$(top_builddir)/contrib/hwloc/include/private/autogen/config.h \
+	$(top_builddir)/contrib/hwloc/include/hwloc/autogen/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
@@ -172,7 +182,8 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(bindir)" "$(DESTDIR)$(sysconfdir)" \
 	"$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-lib_lib@UTILIBNAME@_la_DEPENDENCIES =
+am__DEPENDENCIES_1 =
+lib_lib@UTILIBNAME@_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__lib_lib@UTILIBNAME@_la_SOURCES_DIST = src/common.c src/linux/uti.c \
 	src/mckernel/uti.c
 am__dirstamp = $(am__leading_dot)dirstamp
@@ -203,7 +214,7 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/include
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/include -I$(top_builddir)/contrib/hwloc/include/private/autogen -I$(top_builddir)/contrib/hwloc/include/hwloc/autogen
 depcomp = $(SHELL) $(top_srcdir)/confdb/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -276,7 +287,10 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/confdb/ar-lib \
 	$(top_srcdir)/confdb/config.rpath \
 	$(top_srcdir)/confdb/config.sub $(top_srcdir)/confdb/depcomp \
 	$(top_srcdir)/confdb/install-sh $(top_srcdir)/confdb/ltmain.sh \
-	$(top_srcdir)/confdb/missing $(top_srcdir)/src/Makefile.mk \
+	$(top_srcdir)/confdb/missing \
+	$(top_srcdir)/contrib/hwloc/include/hwloc/autogen/config.h.in \
+	$(top_srcdir)/contrib/hwloc/include/private/autogen/config.h.in \
+	$(top_srcdir)/src/Makefile.mk \
 	$(top_srcdir)/src/include/config.h.in \
 	$(top_srcdir)/src/linux/Makefile.mk \
 	$(top_srcdir)/src/mckernel/Makefile.mk README confdb/ar-lib \
@@ -336,6 +350,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BASH = @BASH@
 BASH_SHELL = @BASH_SHELL@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -358,6 +373,42 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GREP = @GREP@
+HWLOC_CFLAGS = @HWLOC_CFLAGS@
+HWLOC_CPPFLAGS = @HWLOC_CPPFLAGS@
+HWLOC_CUDA_LIBS = @HWLOC_CUDA_LIBS@
+HWLOC_EMBEDDED_CFLAGS = @HWLOC_EMBEDDED_CFLAGS@
+HWLOC_EMBEDDED_CPPFLAGS = @HWLOC_EMBEDDED_CPPFLAGS@
+HWLOC_EMBEDDED_LDADD = @HWLOC_EMBEDDED_LDADD@
+HWLOC_EMBEDDED_LIBS = @HWLOC_EMBEDDED_LIBS@
+HWLOC_GL_LIBS = @HWLOC_GL_LIBS@
+HWLOC_HAVE_LIBXML2 = @HWLOC_HAVE_LIBXML2@
+HWLOC_HAVE_NVML = @HWLOC_HAVE_NVML@
+HWLOC_HAVE_OPENCL = @HWLOC_HAVE_OPENCL@
+HWLOC_LDFLAGS = @HWLOC_LDFLAGS@
+HWLOC_LIBS = @HWLOC_LIBS@
+HWLOC_LIBS_PRIVATE = @HWLOC_LIBS_PRIVATE@
+HWLOC_LIBXML2_CFLAGS = @HWLOC_LIBXML2_CFLAGS@
+HWLOC_LIBXML2_LIBS = @HWLOC_LIBXML2_LIBS@
+HWLOC_MS_LIB = @HWLOC_MS_LIB@
+HWLOC_MS_LIB_ARCH = @HWLOC_MS_LIB_ARCH@
+HWLOC_NVML_LIBS = @HWLOC_NVML_LIBS@
+HWLOC_OPENCL_CFLAGS = @HWLOC_OPENCL_CFLAGS@
+HWLOC_OPENCL_LDFLAGS = @HWLOC_OPENCL_LDFLAGS@
+HWLOC_OPENCL_LIBS = @HWLOC_OPENCL_LIBS@
+HWLOC_PCIACCESS_CFLAGS = @HWLOC_PCIACCESS_CFLAGS@
+HWLOC_PCIACCESS_LIBS = @HWLOC_PCIACCESS_LIBS@
+HWLOC_PLUGINS_DIR = @HWLOC_PLUGINS_DIR@
+HWLOC_PLUGINS_PATH = @HWLOC_PLUGINS_PATH@
+HWLOC_RELEASE_DATE = @HWLOC_RELEASE_DATE@
+HWLOC_REQUIRES = @HWLOC_REQUIRES@
+
+# Switch between internal and external hwloc
+HWLOC_SUBDIRS = @HWLOC_SUBDIRS@
+HWLOC_VERSION = @HWLOC_VERSION@
+HWLOC_X11_CPPFLAGS = @HWLOC_X11_CPPFLAGS@
+HWLOC_X11_LIBS = @HWLOC_X11_LIBS@
+HWLOC_top_builddir = @HWLOC_top_builddir@
+HWLOC_top_srcdir = @HWLOC_top_srcdir@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -377,7 +428,6 @@ MAKE = @MAKE@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
-MPI_PATH = @MPI_PATH@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -392,6 +442,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_CFLAGS = @SET_CFLAGS@
@@ -413,6 +464,11 @@ UTI_LIBS = @UTI_LIBS@
 UTI_RELEASE_DATE = @UTI_RELEASE_DATE@
 UTI_VERSION = @UTI_VERSION@
 VERSION = @VERSION@
+XMKMF = @XMKMF@
+X_CFLAGS = @X_CFLAGS@
+X_EXTRA_LIBS = @X_EXTRA_LIBS@
+X_LIBS = @X_LIBS@
+X_PRE_LIBS = @X_PRE_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -465,25 +521,33 @@ sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
+target = @target@
 target_alias = @target_alias@
+target_cpu = @target_cpu@
+target_os = @target_os@
+target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 uti_libtool_static_flag = @uti_libtool_static_flag@
 with_cap = @with_cap@
-with_hwloc = @with_hwloc@
 with_rm = @with_rm@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I confdb
 
 # automake requires that we initialize variables to something, even just empty,
 # before appending to them with "+="
-AM_CPPFLAGS = -Wall -I$(top_srcdir)/src/include \
-	-I$(top_builddir)/src/include $(am__append_1) $(am__append_4)
+AM_CFLAGS = $(HWLOC_EMBEDDED_CFLAGS)
+AM_CPPFLAGS = -Wall $(HWLOC_EMBEDDED_CPPFLAGS) \
+	-I$(top_srcdir)/src/include -I$(top_builddir)/src/include \
+	$(am__append_1) $(am__append_4)
 AM_LDFLAGS = $(am__append_2)
 include_HEADERS = src/include/uti.h
 lib_lib@UTILIBNAME@_la_SOURCES = src/common.c $(am__append_3) \
 	$(am__append_5)
+lib_lib@UTILIBNAME@_la_LIBADD = $(HWLOC_EMBEDDED_LDADD)
+lib_lib@UTILIBNAME@_la_LDFLAGS = $(ABIVERSIONFLAGS) $(HWLOC_EMBEDDED_LIBS)
+lib_LTLIBRARIES = lib/lib@UTILIBNAME@.la
 nodist_include_HEADERS = 
 nodist_noinst_HEADERS = 
 BUILT_SOURCES = 
@@ -504,23 +568,21 @@ MANDOC_SUBDIRS =
 HTMLDOC_SUBDIRS = 
 INSTALL_DATA_LOCAL_TARGETS = 
 
-# add target name to this variable to add them to the dependencies of the
-# clean-local target
-CLEAN_LOCAL_TARGETS = 
+# Gather HEADERS, SOURCES, CPPFLAGS
 
-# gather HEADERS, SOURCES, CPPFLAGS
-lib_LTLIBRARIES = lib/lib@UTILIBNAME@.la
-lib_lib@UTILIBNAME@_la_LIBADD = $(external_libs)
-lib_lib@UTILIBNAME@_la_LDFLAGS = $(external_ldflags) $(ABIVERSIONFLAGS)
+# for $subdir in $SUBDIRS; do make -C $subdir all; done
+# Note that hwloc should be built first 
+SUBDIRS = $(HWLOC_SUBDIRS) . test
 
-# Let "make" recurse in the following directories
-SUBDIRS = . test
-
-# Let "make distclean" recurse in the following directories
-DIST_SUBDIRS = . test
+# for $subdir in $SUBDIRS; do make -C $subdir distclean; done
+DIST_SUBDIRS = $(HWLOC_SUBDIRS) . test
 
 # Specify files to distribute but not covered automatically
 EXTRA_DIST = README LICENSE RELEASE CONTRIBUTORS
+
+# Add target name to this variable to add them to the dependencies of the
+# clean-local target
+CLEAN_LOCAL_TARGETS = 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -573,8 +635,24 @@ $(top_srcdir)/src/include/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_de
 	rm -f src/include/stamp-h1
 	touch $@
 
+contrib/hwloc/include/private/autogen/config.h: contrib/hwloc/include/private/autogen/stamp-h2
+	@test -f $@ || rm -f contrib/hwloc/include/private/autogen/stamp-h2
+	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) contrib/hwloc/include/private/autogen/stamp-h2
+
+contrib/hwloc/include/private/autogen/stamp-h2: $(top_srcdir)/contrib/hwloc/include/private/autogen/config.h.in $(top_builddir)/config.status
+	@rm -f contrib/hwloc/include/private/autogen/stamp-h2
+	cd $(top_builddir) && $(SHELL) ./config.status contrib/hwloc/include/private/autogen/config.h
+
+contrib/hwloc/include/hwloc/autogen/config.h: contrib/hwloc/include/hwloc/autogen/stamp-h3
+	@test -f $@ || rm -f contrib/hwloc/include/hwloc/autogen/stamp-h3
+	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) contrib/hwloc/include/hwloc/autogen/stamp-h3
+
+contrib/hwloc/include/hwloc/autogen/stamp-h3: $(top_srcdir)/contrib/hwloc/include/hwloc/autogen/config.h.in $(top_builddir)/config.status
+	@rm -f contrib/hwloc/include/hwloc/autogen/stamp-h3
+	cd $(top_builddir) && $(SHELL) ./config.status contrib/hwloc/include/hwloc/autogen/config.h
+
 distclean-hdr:
-	-rm -f src/include/config.h src/include/stamp-h1
+	-rm -f src/include/config.h src/include/stamp-h1 contrib/hwloc/include/private/autogen/config.h contrib/hwloc/include/private/autogen/stamp-h2 contrib/hwloc/include/hwloc/autogen/config.h contrib/hwloc/include/hwloc/autogen/stamp-h3
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)

@@ -7,7 +7,7 @@ AC_INIT([UTI],
 	UTI_VERSION_m4,
 	[masamichi.takagi@riken.jp],
 	[uti],
-	[http://])
+	[https://github.com/RIKEN-SysSoft/uti])
 
 if test "x$prefix" != "xNONE" && test -d "$prefix"; then
    if test "x`(cd \"$prefix\"; echo \"$PWD\")`" = "x`(cd \"$srcdir\"; echo \"$PWD\")`" || \
@@ -69,6 +69,12 @@ AC_CONFIG_AUX_DIR(confdb)
 dnl our macro dir is the same as our aux dir
 AC_CONFIG_MACRO_DIR([confdb])
 
+# Define macros for hwloc macros. Note that it uses definitions done
+# by AC_CONFIG_MACRO_DIR
+AC_CANONICAL_TARGET
+AC_ARG_PROGRAM
+AC_USE_SYSTEM_EXTENSIONS
+
 # tell subconfigures that they are built from within UTI
 FROM_UTI=yes
 export FROM_UTI
@@ -101,9 +107,6 @@ m4_dquote(
 [src_linux],
 [src_mckernel]dnl <--- this dnl is important
 ))
-
-# Add MPI_PATH
-AC_ARG_VAR(MPI_PATH, [MPI install directory])
 
 #m4_include([debug.m4])
 
@@ -207,6 +210,7 @@ export master_top_srcdir
 
 AC_ARG_VAR([UTILIBNAME],[can be used to override the name of the UTI library (default: "uti")])
 UTILIBNAME=${UTILIBNAME:-"uti"}
+AC_SUBST(UTILIBNAME)
 
 # Set up default optimization level of compiler
 UTI_DEFAULT_COPTS="-O2"
@@ -326,7 +330,58 @@ AC_C_VOLATILE
 AC_C_RESTRICT
 AC_C_INLINE
 
-AC_SUBST(UTILIBNAME)
+# Switch between internal and external hwloc
+if test -z "$with_hwloc" -o "$with_hwloc" == "embedded" ; then
+	# See "Embedding hwloc in Other Software" web page
+	AC_MSG_NOTICE([Top level configfure: Building contrib/hwloc])
+
+	# Include hwloc macros
+	m4_include([contrib/hwloc/config/hwloc.m4])
+	m4_include([contrib/hwloc/config/hwloc_check_attributes.m4])
+	m4_include([contrib/hwloc/config/hwloc_check_visibility.m4])
+	m4_include([contrib/hwloc/config/hwloc_check_vendor.m4])
+	m4_include([contrib/hwloc/config/hwloc_components.m4])
+	m4_include([contrib/hwloc/config/hwloc_pkg.m4])
+
+	# Include netloc macros
+	m4_include([contrib/hwloc/config/netloc.m4])
+
+	# Define variables and AC_SUBST them
+	HWLOC_SETUP_CORE([contrib/hwloc],[have_hwloc=yes],[have_hwloc=no])
+	HWLOC_SUBDIRS="contrib/hwloc"
+	AC_SUBST([HWLOC_SUBDIRS])
+
+	AS_IF([test "$have_hwloc" == "no"],
+		[AC_MSG_ERROR([contrib/hwloc is broken])])
+
+	# Define conditionals used by hwloc/Makefile.am	
+	HWLOC_DO_AM_CONDITIONALS
+	NETLOC_DO_AM_CONDITIONALS
+else
+	AC_MSG_NOTICE([Top level configfure: Linking external hwloc])
+
+	PAC_SET_HEADER_LIB_PATH(hwloc)
+	PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_hwloc}/lib],[LDFLAGS])
+
+	# Check if hwloc is linkable
+	PAC_CHECK_HEADER_LIB_FATAL(hwloc, hwloc.h, hwloc, hwloc_topology_init)
+
+	# Check version of hwloc
+	hwloc_pkgconfig_dir=`find $with_hwloc/lib $with_hwloc/lib64 -name pkgconfig 2> /dev/null | tr '\n' ':' | sed 's/:$//'`
+	AC_MSG_NOTICE([hwloc_pkgconfig_dir=$hwloc_pkgconfig_dir])
+
+	AS_IF([test -z "$hwloc_pkgconfig_dir"],
+	[AC_MSG_ERROR([hwloc.pc not found])])
+
+	hwloc_version=`PKG_CONFIG_PATH=$hwloc_pkgconfig_dir pkg-config --modversion hwloc | cut -d'.' -f 1-2`
+	AC_MSG_NOTICE([hwloc_version=$hwloc_version])
+
+	AS_IF([test "x`echo $hwloc_version \>= 2.0 | bc -l`" == x0],
+		[AC_MSG_ERROR([Use hwloc-2.0 or later])])
+fi
+
+# Add hwloc to SUBDIR in Makefile.am
+AM_CONDITIONAL([SUBDIR_ADD_HWLOC],[test -z "$with_hwloc" -o "$with_hwloc" == "embedded"])
 
 dnl configure any subdirectories. Note that config.status will *not*
 dnl reexecute these!
@@ -399,31 +454,13 @@ m4_map([PAC_SUBCFG_DO_PREREQ], [PAC_SUBCFG_MODULE_LIST])
 # Run BODY part of subconfigure.m4
 m4_map([PAC_SUBCFG_CONFIGURE_SUBSYS], [PAC_SUBCFG_MODULE_LIST])
 
-# Append hwloc path to CPPFLAGS and LDFLAGS via --with-hwloc=<path>
-PAC_SET_HEADER_LIB_PATH(hwloc)
+# Configure hwloc with --enable-embedded-mode
+if test -z "$with_hwloc" -o "$with_hwloc" == "embedded" ; then
+	export enable_embedded_mode=yes
+	AC_CONFIG_SUBDIRS([contrib/hwloc])
+fi
 
-# Check if hwloc is linkable
-PAC_CHECK_HEADER_LIB_FATAL(hwloc, hwloc.h, hwloc, hwloc_topology_init)
-
-# Export with_hwloc to Makefile.am
-AS_IF([test -z "$with_hwloc"],
-	[AC_MSG_ERROR([Specify --with-hwloc=<path>])])
-AC_SUBST(with_hwloc)
-
-# Check version of hwloc
-hwloc_pkgconfig_dir=`find $with_hwloc/lib $with_hwloc/lib64 -name pkgconfig 2> /dev/null | tr '\n' ':' | sed 's/:$//'`
-AC_MSG_NOTICE([hwloc_pkgconfig_dir=$hwloc_pkgconfig_dir])
-
-AS_IF([test -z "$hwloc_pkgconfig_dir"],
-	[AC_MSG_ERROR([hwloc.pc not found])])
-
-hwloc_version=`PKG_CONFIG_PATH=$hwloc_pkgconfig_dir pkg-config --modversion hwloc | cut -d'.' -f 1-2`
-AC_MSG_NOTICE([hwloc_version=$hwloc_version])
-
-AS_IF([test "x`echo $hwloc_version \>= 2.0 | bc -l`" == x0],
-	[AC_MSG_ERROR([Use hwloc-2.0 or later])])
-
-# Let "configure" recurse in test
+# Configure test
 AC_CONFIG_SUBDIRS([test])
 
 #################################################################################

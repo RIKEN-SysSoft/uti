@@ -4,7 +4,7 @@ AM_CPPFLAGS += \
 	-I$(top_srcdir)/src/linux/include
 
 AM_LDFLAGS += \
-	-Wl,-rpath -Wl,$(with_hwloc)/lib -lhwloc -lcap -lrt
+	-lcap -lrt
 
 lib_lib@UTILIBNAME@_la_SOURCES += \
 	src/linux/uti.c
