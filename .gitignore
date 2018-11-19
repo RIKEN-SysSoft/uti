@@ -1,5 +1,9 @@
-/aclocal.m4
 *~
+
+# Assuming everyone runs autogen.sh before configuring
+**/aclocal.m4
+**/Makefile.in
+**/configure
 
 # confdb/ tools installed by autoreconf -iv
 /confdb/ar-lib

@@ -183,9 +183,6 @@
 /* Define to 1 if we have -lgdi32 */
 #undef HAVE_LIBGDI32
 
-/* Define to 1 if you have the `hwloc' library (-lhwloc). */
-#undef HAVE_LIBHWLOC
-
 /* Define to 1 if we have -lkstat */
 #undef HAVE_LIBKSTAT
 

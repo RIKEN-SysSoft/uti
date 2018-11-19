@@ -326,58 +326,31 @@ AC_C_VOLATILE
 AC_C_RESTRICT
 AC_C_INLINE
 
-# Switch between internal and external hwloc
-if test -z "$with_hwloc" -o "$with_hwloc" == "embedded" ; then
-	# See "Embedding hwloc in Other Software" web page
-	AC_MSG_NOTICE([Top level configfure: Building contrib/hwloc])
+# Embed hwloc. See "Embedding hwloc in Other Software" web page
+AC_MSG_NOTICE([Top level configfure: Embedding contrib/hwloc])
 
-	# Include hwloc macros
-	m4_include([contrib/hwloc/config/hwloc.m4])
-	m4_include([contrib/hwloc/config/hwloc_check_attributes.m4])
-	m4_include([contrib/hwloc/config/hwloc_check_visibility.m4])
-	m4_include([contrib/hwloc/config/hwloc_check_vendor.m4])
-	m4_include([contrib/hwloc/config/hwloc_components.m4])
-	m4_include([contrib/hwloc/config/hwloc_pkg.m4])
+# Include hwloc macros
+m4_include([contrib/hwloc/config/hwloc.m4])
+m4_include([contrib/hwloc/config/hwloc_check_attributes.m4])
+m4_include([contrib/hwloc/config/hwloc_check_visibility.m4])
+m4_include([contrib/hwloc/config/hwloc_check_vendor.m4])
+m4_include([contrib/hwloc/config/hwloc_components.m4])
+m4_include([contrib/hwloc/config/hwloc_pkg.m4])
 
-	# Include netloc macros
-	m4_include([contrib/hwloc/config/netloc.m4])
+# Include netloc macros
+m4_include([contrib/hwloc/config/netloc.m4])
 
-	# Define variables and AC_SUBST them
-	HWLOC_SETUP_CORE([contrib/hwloc],[have_hwloc=yes],[have_hwloc=no])
-	HWLOC_SUBDIRS="contrib/hwloc"
-	AC_SUBST([HWLOC_SUBDIRS])
+# Define variables and AC_SUBST them
+HWLOC_SETUP_CORE([contrib/hwloc],[have_hwloc=yes],[have_hwloc=no])
+HWLOC_SUBDIRS="contrib/hwloc"
+AC_SUBST([HWLOC_SUBDIRS])
 
-	AS_IF([test "$have_hwloc" == "no"],
-		[AC_MSG_ERROR([contrib/hwloc is broken])])
+AS_IF([test "$have_hwloc" == "no"],
+[AC_MSG_ERROR([contrib/hwloc is broken])])
 
-	# Define conditionals used by hwloc/Makefile.am	
-	HWLOC_DO_AM_CONDITIONALS
-	NETLOC_DO_AM_CONDITIONALS
-else
-	AC_MSG_NOTICE([Top level configfure: Linking external hwloc])
-
-	PAC_SET_HEADER_LIB_PATH(hwloc)
-	PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_hwloc}/lib],[LDFLAGS])
-
-	# Check if hwloc is linkable
-	PAC_CHECK_HEADER_LIB_FATAL(hwloc, hwloc.h, hwloc, hwloc_topology_init)
-
-	# Check version of hwloc
-	hwloc_pkgconfig_dir=`find $with_hwloc/lib $with_hwloc/lib64 -name pkgconfig 2> /dev/null | tr '\n' ':' | sed 's/:$//'`
-	AC_MSG_NOTICE([hwloc_pkgconfig_dir=$hwloc_pkgconfig_dir])
-
-	AS_IF([test -z "$hwloc_pkgconfig_dir"],
-	[AC_MSG_ERROR([hwloc.pc not found])])
-
-	hwloc_version=`PKG_CONFIG_PATH=$hwloc_pkgconfig_dir pkg-config --modversion hwloc | cut -d'.' -f 1-2`
-	AC_MSG_NOTICE([hwloc_version=$hwloc_version])
-
-	AS_IF([test "x`echo $hwloc_version \>= 2.0 | bc -l`" == x0],
-		[AC_MSG_ERROR([Use hwloc-2.0 or later])])
-fi
-
-# Add hwloc to SUBDIR in Makefile.am
-AM_CONDITIONAL([SUBDIR_ADD_HWLOC],[test -z "$with_hwloc" -o "$with_hwloc" == "embedded"])
+# Define conditionals used in contrib/hwloc/Makefile.in
+HWLOC_DO_AM_CONDITIONALS
+NETLOC_DO_AM_CONDITIONALS
 
 dnl configure any subdirectories. Note that config.status will *not*
 dnl reexecute these!
@@ -451,10 +424,8 @@ m4_map([PAC_SUBCFG_DO_PREREQ], [PAC_SUBCFG_MODULE_LIST])
 m4_map([PAC_SUBCFG_CONFIGURE_SUBSYS], [PAC_SUBCFG_MODULE_LIST])
 
 # Configure hwloc with --enable-embedded-mode
-if test -z "$with_hwloc" -o "$with_hwloc" == "embedded" ; then
-	export enable_embedded_mode=yes
-	AC_CONFIG_SUBDIRS([contrib/hwloc])
-fi
+export enable_embedded_mode=yes
+AC_CONFIG_SUBDIRS([contrib/hwloc])
 
 # Configure test
 AC_CONFIG_SUBDIRS([test])
