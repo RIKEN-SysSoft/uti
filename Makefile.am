@@ -6,6 +6,8 @@ HWLOC_SUBDIRS = @HWLOC_SUBDIRS@
 
 # Options used to build hwloc_embedded.la
 HWLOC_EMBEDDED_CFLAGS = @HWLOC_EMBEDDED_CFLAGS@
+
+# Options needed to use hwloc_embedded.la
 HWLOC_EMBEDDED_CPPFLAGS = @HWLOC_EMBEDDED_CPPFLAGS@
 
 # Location of hwloc_embedded.la
@@ -17,7 +19,7 @@ HWLOC_EMBEDDED_LIBS = @HWLOC_EMBEDDED_LIBS@
 # automake requires that we initialize variables to something, even just empty,
 # before appending to them with "+="
 AM_CFLAGS =
-AM_CPPFLAGS = -Wall -I$(top_srcdir)/src/include -I$(top_builddir)/src/include
+AM_CPPFLAGS = -Wall -I$(top_srcdir)/src/include -I$(top_builddir)/src/include $(HWLOC_CPPFLAGS)
 AM_LDFLAGS =
 include_HEADERS = src/include/uti.h
 lib_lib@UTILIBNAME@_la_SOURCES = src/common.c

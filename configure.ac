@@ -146,7 +146,10 @@ PAC_POP_FLAG([CFLAGS])
 
 dnl now that autoconf and core compilers are setup, init automake and libtool
 AM_INIT_AUTOMAKE([-Wall -Wno-portability-recursive foreign 1.12.3 silent-rules subdir-objects])
-AM_MAINTAINER_MODE([enable])
+
+# Don't enable this because it will insert @MAINTAINER_MODE_TRUE@ into
+# contrib/hwloc/hwloc/Makefile.in
+# AM_MAINTAINER_MODE([enable])
 
 AM_PROG_AR
 
