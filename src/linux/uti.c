@@ -687,6 +687,10 @@ int uti_pthread_create(pthread_t *thread, pthread_attr_t *_pthread_attr,
 	if ((ret = pthread_create(thread, pthread_attr, start_routine, arg))) {
 		pr_err("%s: error: pthread_create: %s\n",
 		       __func__, strerror(ret));
+		if (!(ret = syscall(731, 1, uti_attr))) {
+			pr_warn("%s: warning: libuti.so for Linux is used\n",
+				__func__);
+		}
 		goto out;
 	}
 

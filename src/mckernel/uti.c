@@ -50,8 +50,8 @@ int uti_pthread_create(pthread_t *thread, pthread_attr_t *attr,
 	}
 
 	if ((ret = pthread_create(thread, attr, start_routine, arg))) {
-		pr_err("%s: error: pthread_create (%d)\n",
-		       __func__, ret);
+		pr_err("%s: error: pthread_create: %s\n",
+		       __func__, strerror(ret));
 		goto out;
 	}
 
