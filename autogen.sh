@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/sh
 
 
 # Prevent the following issues associated with recursive autoreconf
