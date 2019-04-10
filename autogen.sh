@@ -8,7 +8,7 @@
 #     if ! grep -qE 'AC_CHECK_PROGS\(MAKE,make gnumake nmake pmake smake\)' contrib/hwloc/configure.ac; then
 #         sed -i '/^AM_INIT_AUTOMAKE/ a if test "X$MAKE" = "X" ; then\n\tAC_CHECK_PROGS(MAKE,make gnumake nmake pmake smake)\nfi' contrib/hwloc/configure.ac
 #     fi
-subdirs=". contrib/hwloc"
+subdirs=". contrib/hwloc test"
 for subdir in $subdirs; do
     (cd $subdir && autoreconf -iv --no-recursive)
 done
