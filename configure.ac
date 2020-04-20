@@ -344,6 +344,7 @@ m4_include([contrib/hwloc/config/hwloc_pkg.m4])
 m4_include([contrib/hwloc/config/netloc.m4])
 
 # Define variables and AC_SUBST them
+HWLOC_SET_SYMBOL_PREFIX(uti_)
 HWLOC_SETUP_CORE([contrib/hwloc],[have_hwloc=yes],[have_hwloc=no])
 HWLOC_SUBDIRS="contrib/hwloc"
 AC_SUBST([HWLOC_SUBDIRS])
