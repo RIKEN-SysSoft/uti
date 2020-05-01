@@ -7,16 +7,15 @@
 %define _build_id_links none
 
 %define uti_version @UTI_VERSION@
-%define uti_release %(git log -1 --format=%cs)
 
 Name: uti
 Version: %{uti_version}
-Release: %{uti_release}
+Release: 1%{?dist}
 Summary: Utility Thread Offloading Library
 License: GPLv2
 Source0: https://github.com/RIKEN-SysSoft/uti/archive/%{uti_version}.tar.gz
 BuildRequires: libcap-dev rdma-core-devel
-Requires: libcap
+Requires: libcap rdma-core
 
 %description
 Utility Thread Offloading Library
