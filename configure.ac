@@ -429,7 +429,6 @@ m4_map([PAC_SUBCFG_CONFIGURE_SUBSYS], [PAC_SUBCFG_MODULE_LIST])
 
 # Configure hwloc with --enable-embedded-mode
 export enable_embedded_mode=yes
-AC_CONFIG_SUBDIRS([contrib/hwloc])
 
 # Configure test
 AC_CONFIG_SUBDIRS([test])

@@ -1,25 +1,13 @@
 AUTOMAKE_OPTIONS = foreign
-ACLOCAL_AMFLAGS = -I confdb
+ACLOCAL_AMFLAGS = -I confdb -Icontrib/hwloc/config
 
 # Location of internal hwloc 
-HWLOC_SUBDIRS = @HWLOC_SUBDIRS@
-
-# Options used to build hwloc_embedded.la
-HWLOC_EMBEDDED_CFLAGS = @HWLOC_EMBEDDED_CFLAGS@
-
-# Options needed to use hwloc_embedded.la
-HWLOC_EMBEDDED_CPPFLAGS = @HWLOC_EMBEDDED_CPPFLAGS@
-
-# Location of hwloc_embedded.la
-HWLOC_EMBEDDED_LDADD = @HWLOC_EMBEDDED_LDADD@
-
-# Libraries used by hwloc_embedded.la
-HWLOC_EMBEDDED_LIBS = @HWLOC_EMBEDDED_LIBS@
+HWLOC_SUBDIRS = contrib/hwloc
 
 # automake requires that we initialize variables to something, even just empty,
 # before appending to them with "+="
-AM_CFLAGS =
-AM_CPPFLAGS = -Wall -I$(top_srcdir)/src/include -I$(top_builddir)/src/include $(HWLOC_CPPFLAGS)
+AM_CFLAGS = $(HWLOC_EMBEDDED_CFLAGS)
+AM_CPPFLAGS = -Wall -I$(top_srcdir)/src/include -I$(top_builddir)/src/include $(HWLOC_EMBEDDED_CPPFLAGS)
 AM_LDFLAGS =
 include_HEADERS = src/include/uti.h
 lib_lib@UTILIBNAME@_la_SOURCES = src/common.c
