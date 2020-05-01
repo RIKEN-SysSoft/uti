@@ -1,9 +1,17 @@
 *~
 
 # Assuming everyone runs autogen.sh before configuring
-**/aclocal.m4
-**/Makefile.in
-**/configure
+/aclocal.m4
+/Makefile.in
+/configure
+/autom4te.cache
+/test/aclocal.m4
+/test/Makefile.in
+/test/configure
+/test/autom4te.cache
+/contrib/hwloc/Makefile.in
+/contrib/hwloc/hwloc/Makefile.in
+/contrib/hwloc/include/Makefile.in
 
 # confdb/ tools installed by autoreconf -iv
 /confdb/ar-lib
