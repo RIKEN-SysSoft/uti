@@ -66,6 +66,8 @@ typedef struct uti_attr {
 
 /* Attribute: Functions */
 
+#pragma GCC visibility push(default)
+
 int uti_attr_init(uti_attr_t *attr);
 int uti_attr_destroy(uti_attr_t *attr);
 
@@ -235,5 +237,6 @@ int uti_pthread_create(pthread_t *thread, pthread_attr_t *attr,
                        void *(*start_routine) (void *), void * arg,
                        uti_attr_t *uti_attr);
 
+#pragma GCC visibility pop
 
 #endif /* _UTI_H_INCLUDED_ */
