@@ -234,6 +234,16 @@ __attribute__((constructor)) void uti_init(void)
 	struct stat shm_stat;
 	int retry;
 	unsigned int uti_hwloc_api_version;
+	char *loglevel = NULL;
+
+	loglevel = getenv("UTI_LOGLEVEL");
+	if (loglevel) {
+		int level = atoi(loglevel);
+
+		if (level >= 0 && level <= UTI_LOGLEVEL_DEBUG) {
+			uti_set_loglevel(level);
+		}
+	}
 
 	/* Discover topology */
 	if ((ret = uti_hwloc_topology_init(&topo))) {

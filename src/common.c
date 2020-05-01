@@ -3,4 +3,4 @@
 
 /* Log */
 
-enum uti_loglevel uti_loglevel = UTI_LOGLEVEL_DEBUG;
+enum uti_loglevel uti_loglevel = UTI_LOGLEVEL_WARN;
