@@ -41,6 +41,7 @@ fi
 
 # config.h location and templates
 AC_CONFIG_HEADER([src/include/config.h])
+AC_CONFIG_FILES([scripts/uti.spec])
 
 AH_TOP([/* 
  * \file config.h

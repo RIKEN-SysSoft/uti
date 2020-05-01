@@ -1,0 +1,53 @@
+# uti spec file usage:
+# (cd SOURCES && git clone 
+# put uti.spec to SPECS and uti-@UTI_VERSION@.tar.gz to SOURCES
+# rpmbuild -ba uti.spec
+
+# Prevent rpmbuild from including build-id directories into package
+%define _build_id_links none
+
+%define uti_version @UTI_VERSION@
+%define uti_release %(git log -1 --format=%cs)
+
+Name: uti
+Version: %{uti_version}
+Release: %{uti_release}
+Summary: Utility Thread Offloading Library
+License: GPLv2
+Source0: https://github.com/RIKEN-SysSoft/uti/archive/%{uti_version}.tar.gz
+BuildRequires: libcap-dev rdma-core-devel
+Requires: libcap
+
+%description
+Utility Thread Offloading Library
+
+%package	devel
+Summary:	Headers and libraries required for build apps using UTI
+Requires:	%{name} = %{version}-%{release}
+
+%description	devel
+This package contains headers and libraries required for build apps using UTI.
+
+%prep
+%setup -q
+
+%build
+%configure --with-rm=linux
+make %{?_smp_mflags}
+
+%install
+%make_install
+
+%files
+%{_libdir}/libuti.so
+%{_libdir}/libuti.so.0
+%{_libdir}/libuti.so.0.0.0
+%{_libdir}/libuti.a
+%{_libdir}/libuti.la
+
+%files	devel
+%{_includedir}/uti.h
+
+%changelog
+* Fri May 1 2020 Masamichi Takagi <masamichi.takagi@riken.jp> - 1.0.0-
+- Initial package
