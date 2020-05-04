@@ -76,15 +76,16 @@ AC_ARG_ENABLE(g,
                       comma separated names including
         none     - No debug compiler flag is appended.
         dbg      - Append -g to compiler flags, which are used
-                   for compiling the library. 
-],,enable_g=dbg)
+                   for compiling the programs.
+],,enable_g=none)
 
 AC_ARG_ENABLE(fast,
 [  --enable-fast=option - Control the optimization level. Option is a 
                          list of comma separated names including
+        none     - No optimization flag is appended.
         O<n>     - Append -O<n> to compiler flags, whcih are used 
-                   for compiling the library.
-],,enable_fast=defopt)
+                   for compiling the programs.
+],,enable_fast=none)
 
 # Define with_rm
 AC_ARG_WITH(rm,
@@ -163,21 +164,16 @@ AC_SUBST(master_top_srcdir)
 export master_top_builddir
 export master_top_srcdir
 
-# Set up default optimization level of compiler
-UTI_DEFAULT_COPTS="-O2"
-
 # enable-fast
 save_IFS="$IFS"
 IFS=","
 for option in $enable_fast ; do
     case "$option" in
-         defopt)
-         enable_default_optimize=yes
-    	 UTI_DEFAULT_COPTS="-O0"
-	 ;;
     	 O*)
          enable_default_optimize=yes
     	 UTI_DEFAULT_COPTS="-$option"
+	 ;;
+         none)
 	 ;;
 	 *)
 	 IFS="$save_IFS"

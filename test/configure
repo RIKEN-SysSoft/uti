@@ -1433,12 +1433,13 @@ Optional Features:
                       comma separated names including
         none     - No debug compiler flag is appended.
         dbg      - Append -g to compiler flags, which are used
-                   for compiling the library.
+                   for compiling the programs.
 
   --enable-fast=option - Control the optimization level. Option is a
                          list of comma separated names including
+        none     - No optimization flag is appended.
         O<n>     - Append -O<n> to compiler flags, whcih are used
-                   for compiling the library.
+                   for compiling the programs.
 
   --enable-dependency-tracking
                           do not reject slow dependency extractors
@@ -2543,7 +2544,7 @@ LIBS="$LIBS $UTITEST_LIBS"
 if test "${enable_g+set}" = set; then :
   enableval=$enable_g;
 else
-  enable_g=dbg
+  enable_g=none
 fi
 
 
@@ -2551,7 +2552,7 @@ fi
 if test "${enable_fast+set}" = set; then :
   enableval=$enable_fast;
 else
-  enable_fast=defopt
+  enable_fast=none
 fi
 
 
@@ -13317,21 +13318,16 @@ fi
 export master_top_builddir
 export master_top_srcdir
 
-# Set up default optimization level of compiler
-UTI_DEFAULT_COPTS="-O2"
-
 # enable-fast
 save_IFS="$IFS"
 IFS=","
 for option in $enable_fast ; do
     case "$option" in
-         defopt)
-         enable_default_optimize=yes
-    	 UTI_DEFAULT_COPTS="-O0"
-	 ;;
     	 O*)
          enable_default_optimize=yes
     	 UTI_DEFAULT_COPTS="-$option"
+	 ;;
+         none)
 	 ;;
 	 *)
 	 IFS="$save_IFS"

@@ -1603,6 +1603,7 @@ Optional Features:
 
   --enable-fast=option - Control the optimization level. Option is a
                          list of comma separated names including
+        none     - No optimization flag is appended.
         O<n>     - Append -O<n> to compiler flags, whcih are used
                    for compiling the library.
 
@@ -2975,6 +2976,14 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 
+
+echo "push CFLAGS: $CFLAGS"
+
+	if test -z "${pac_save_CFLAGS_nesting}" ; then
+	   pac_save_CFLAGS_nesting=0
+	fi
+	eval pac_save_CFLAGS_${pac_save_CFLAGS_nesting}='"$CFLAGS"'
+	pac_save_CFLAGS_nesting=`expr ${pac_save_CFLAGS_nesting} + 1`
 
 # Define macros for hwloc macros. Note that it uses definitions done
 # by AC_CONFIG_MACRO_DIR
@@ -4409,6 +4418,12 @@ $as_echo "$ac_cv_safe_to_define___extensions__" >&6; }
 
 
 
+	pac_save_CFLAGS_nesting=`expr ${pac_save_CFLAGS_nesting} - 1`
+	eval CFLAGS="\$pac_save_CFLAGS_${pac_save_CFLAGS_nesting}"
+	eval pac_save_CFLAGS_${pac_save_CFLAGS_nesting}=""
+
+echo "pop CFLAGS: $CFLAGS"
+
 # tell subconfigures that they are built from within UTI
 FROM_UTI=yes
 export FROM_UTI
@@ -4498,7 +4513,7 @@ fi
 if test "${enable_fast+set}" = set; then :
   enableval=$enable_fast;
 else
-  enable_fast=defopt
+  enable_fast=O2
 fi
 
 
@@ -5049,6 +5064,7 @@ $as_echo "no" >&6; }
 $as_echo "#define NO_MINUS_C_MINUS_O 1" >>confdefs.h
 
 fi
+ echo "push CFLAGS: $CFLAGS"
 
 	if test -z "${pac_save_CFLAGS_nesting}" ; then
 	   pac_save_CFLAGS_nesting=0
@@ -5205,6 +5221,7 @@ fi
 	eval CFLAGS="\$pac_save_CFLAGS_${pac_save_CFLAGS_nesting}"
 	eval pac_save_CFLAGS_${pac_save_CFLAGS_nesting}=""
 
+echo "pop CFLAGS: $CFLAGS"
 
 am__api_version='1.16'
 
@@ -14646,21 +14663,16 @@ export master_top_srcdir
 UTILIBNAME=${UTILIBNAME:-"uti"}
 
 
-# Set up default optimization level of compiler
-UTI_DEFAULT_COPTS="-O2"
-
 # enable-fast
 save_IFS="$IFS"
 IFS=","
 for option in $enable_fast ; do
     case "$option" in
-         defopt)
-         enable_default_optimize=yes
-    	 UTI_DEFAULT_COPTS="-O0"
-	 ;;
     	 O*)
          enable_default_optimize=yes
     	 UTI_DEFAULT_COPTS="-$option"
+	 ;;
+         none)
 	 ;;
 	 *)
 	 IFS="$save_IFS"

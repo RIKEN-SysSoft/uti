@@ -63,11 +63,15 @@ AC_CONFIG_AUX_DIR(confdb)
 dnl our macro dir is the same as our aux dir
 AC_CONFIG_MACRO_DIR([confdb])
 
+echo "push CFLAGS: $CFLAGS"
+PAC_PUSH_FLAG([CFLAGS])
 # Define macros for hwloc macros. Note that it uses definitions done
 # by AC_CONFIG_MACRO_DIR
 AC_CANONICAL_TARGET
 AC_ARG_PROGRAM
 AC_USE_SYSTEM_EXTENSIONS
+PAC_POP_FLAG([CFLAGS])
+echo "pop CFLAGS: $CFLAGS"
 
 # tell subconfigures that they are built from within UTI
 FROM_UTI=yes
@@ -117,9 +121,10 @@ AC_ARG_ENABLE(g,
 AC_ARG_ENABLE(fast,
 [  --enable-fast=option - Control the optimization level. Option is a 
                          list of comma separated names including
+        none     - No optimization flag is appended.
         O<n>     - Append -O<n> to compiler flags, whcih are used 
                    for compiling the library.
-],,enable_fast=defopt)
+],,enable_fast=O2)
 
 # Define with_rm
 AC_ARG_WITH(rm,
@@ -135,6 +140,7 @@ export with_rm
 # Find a C compiler.
 PAC_PROG_CC
 AC_PROG_CC_C_O dnl needed for automake "silent-rules"
+echo "push CFLAGS: $CFLAGS"
 PAC_PUSH_FLAG([CFLAGS])
 AC_PROG_CPP
 # Bug in autoconf. Restore cross settings
@@ -144,6 +150,7 @@ if test "$pac_cross_compiling" = "yes" -a "$ac_cv_prog_cc_cross" = "no" ;  then
     ac_cv_prog_cc_cross=yes
 fi
 PAC_POP_FLAG([CFLAGS])
+echo "pop CFLAGS: $CFLAGS"
 
 dnl now that autoconf and core compilers are setup, init automake and libtool
 AM_INIT_AUTOMAKE([-Wall -Wno-portability-recursive foreign 1.12.3 silent-rules subdir-objects])
@@ -209,21 +216,16 @@ AC_ARG_VAR([UTILIBNAME],[can be used to override the name of the UTI library (de
 UTILIBNAME=${UTILIBNAME:-"uti"}
 AC_SUBST(UTILIBNAME)
 
-# Set up default optimization level of compiler
-UTI_DEFAULT_COPTS="-O2"
-
 # enable-fast
 save_IFS="$IFS"
 IFS=","
 for option in $enable_fast ; do
     case "$option" in
-         defopt)
-         enable_default_optimize=yes
-    	 UTI_DEFAULT_COPTS="-O0"
-	 ;;
     	 O*)
          enable_default_optimize=yes
     	 UTI_DEFAULT_COPTS="-$option"
+	 ;;
+         none)
 	 ;;
 	 *)
 	 IFS="$save_IFS"
