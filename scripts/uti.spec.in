@@ -15,8 +15,8 @@ Summary: Utility Thread Offloading Library
 License: GPLv2
 %undefine _disable_source_fetch
 Source0: https://github.com/RIKEN-SysSoft/uti/archive/%{uti_version}.tar.gz
-%define SHA256SUM0 1be173aa9d2da25cee207b7d7b838846ff3703aff44f798e7e17bfb20e52b538
-BuildRequires: libcap-dev rdma-core-devel
+%define SHA256SUM0 d0ea6fa38e6a170efc835e2fcefb022948b341cd6d25e474035410a5894f6788
+BuildRequires: libcap-devel rdma-core-devel
 Requires: libcap rdma-core
 
 %description
