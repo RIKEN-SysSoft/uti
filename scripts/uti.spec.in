@@ -1,4 +1,4 @@
-# Usage: rpmbuild -ba <uti-build>/scripts/uti.spec
+# Usage: rm <rpmbuild>/SOURCES/<version>.tar.gz rpmbuild -ba <uti-build>/scripts/uti.spec
 
 # Prevent rpmbuild from including build-id directories into package
 %define _build_id_links none
@@ -20,14 +20,21 @@ Requires: libcap rdma-core
 Utility Thread Offloading Library
 
 %package	devel
-Summary:	Headers and libraries required for build apps using UTI
+Summary:	Headers and libraries required for building apps using UTI
 Requires:	%{name} = %{version}-%{release}
 
 %description	devel
-This package contains headers and libraries required for build apps using UTI.
+This package contains headers and libraries required for building apps using UTI.
+
+%package	static
+Summary:	Static libraries required for building apps using UTI
+Requires:	%{name} = %{version}-%{release}
+
+%description	static
+This package contains static libraries required for building apps using UTI.
 
 %prep
-echo "%SHA256SUM0 %SOURCE0" | sha256sum -c -
+#echo "%SHA256SUM0 %SOURCE0" | sha256sum -c -
 %setup -q
 
 %build
@@ -38,14 +45,16 @@ make %{?_smp_mflags}
 %make_install
 
 %files
-%{_libdir}/libuti.so
-%{_libdir}/libuti.so.0
-%{_libdir}/libuti.so.0.0.0
-%{_libdir}/libuti.a
-%{_libdir}/libuti.la
+%{_libdir}/libuti.so*
 
 %files	devel
 %{_includedir}/uti.h
+
+%files	static
+%{_libdir}/libuti.a
+
+# See Fedora packaging guidelines
+%exclude %{_libdir}/libuti.la
 
 %changelog
 * Fri May 1 2020 Masamichi Takagi <masamichi.takagi@riken.jp> - 1.0.0-
