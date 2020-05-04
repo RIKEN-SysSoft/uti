@@ -1,7 +1,4 @@
-# uti spec file usage:
-# (cd SOURCES && git clone 
-# put uti.spec to SPECS and uti-@UTI_VERSION@.tar.gz to SOURCES
-# rpmbuild -ba uti.spec
+# Usage: rpmbuild -ba <uti-build>/scripts/uti.spec
 
 # Prevent rpmbuild from including build-id directories into package
 %define _build_id_links none
@@ -15,7 +12,7 @@ Summary: Utility Thread Offloading Library
 License: GPLv2
 %undefine _disable_source_fetch
 Source0: https://github.com/RIKEN-SysSoft/uti/archive/%{uti_version}.tar.gz
-%define SHA256SUM0 d0ea6fa38e6a170efc835e2fcefb022948b341cd6d25e474035410a5894f6788
+%define SHA256SUM0 a4d0925af1d5a499cf08c6057b7057edefd17abb4e25c713e33818dded554117
 BuildRequires: libcap-devel rdma-core-devel
 Requires: libcap rdma-core
 
