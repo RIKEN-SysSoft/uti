@@ -13,7 +13,9 @@ Version: %{uti_version}
 Release: 1%{?dist}
 Summary: Utility Thread Offloading Library
 License: GPLv2
+%undefine _disable_source_fetch
 Source0: https://github.com/RIKEN-SysSoft/uti/archive/%{uti_version}.tar.gz
+%define SHA256SUM0 1be173aa9d2da25cee207b7d7b838846ff3703aff44f798e7e17bfb20e52b538
 BuildRequires: libcap-dev rdma-core-devel
 Requires: libcap rdma-core
 
@@ -28,6 +30,7 @@ Requires:	%{name} = %{version}-%{release}
 This package contains headers and libraries required for build apps using UTI.
 
 %prep
+echo "%SHA256SUM0 %SOURCE0" | sha256sum -c -
 %setup -q
 
 %build
