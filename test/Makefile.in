@@ -103,7 +103,7 @@ am__aclocal_m4_deps = $(top_srcdir)/confdb/aclocal_bugfix.m4 \
 	$(top_srcdir)/confdb/ltsugar.m4 \
 	$(top_srcdir)/confdb/ltversion.m4 \
 	$(top_srcdir)/confdb/lt~obsolete.m4 \
-	$(top_srcdir)/maint/version.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/../maint/version.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \

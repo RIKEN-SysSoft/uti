@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-m4_include([maint/version.m4])
+m4_include([../maint/version.m4])
 AC_INIT([UTI], 
 	UTI_VERSION_m4,
 	[masamichi.takagi@riken.jp],
